@@ -105,7 +105,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         wip: true
-        # Configure the types, scopes, and WIP settings
         types: |
           feat
           fix
@@ -130,8 +129,6 @@ jobs:
           deps
           release
         requireScope: false
-        requireBody: false
-        requireFooter: false
 
   commitlint-push:
     runs-on: ubuntu-latest
