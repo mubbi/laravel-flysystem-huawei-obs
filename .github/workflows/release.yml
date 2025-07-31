@@ -17,7 +17,8 @@ jobs:
       - name: Release
         uses: google-github-actions/release-please-action@v4
         with:
+          command: manifest
           release-type: php
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-          token: ${{ secrets.GITHUB_TOKEN }} 
+          token: ${{ secrets.GITHUB_TOKEN }}
