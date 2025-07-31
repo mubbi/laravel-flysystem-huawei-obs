@@ -1934,6 +1934,73 @@ return [
       ),
     )),
   ),
+  'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\Console\\TestHuaweiObsCommandTest.php' => 
+  array (
+    0 => 
+    \PHPStan\Analyser\Error::__set_state(array(
+       'message' => 'Call to an undefined method Mockery\\ExpectationInterface|Mockery\\HigherOrderMessage::andReturn().',
+       'file' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\Console\\TestHuaweiObsCommandTest.php',
+       'line' => 81,
+       'canBeIgnored' => true,
+       'filePath' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\Console\\TestHuaweiObsCommandTest.php',
+       'traitFilePath' => NULL,
+       'tip' => NULL,
+       'nodeLine' => 81,
+       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
+       'identifier' => 'method.notFound',
+       'metadata' => 
+      array (
+      ),
+    )),
+    1 => 
+    \PHPStan\Analyser\Error::__set_state(array(
+       'message' => 'Call to an undefined method Mockery\\ExpectationInterface|Mockery\\HigherOrderMessage::andReturn().',
+       'file' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\Console\\TestHuaweiObsCommandTest.php',
+       'line' => 102,
+       'canBeIgnored' => true,
+       'filePath' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\Console\\TestHuaweiObsCommandTest.php',
+       'traitFilePath' => NULL,
+       'tip' => NULL,
+       'nodeLine' => 102,
+       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
+       'identifier' => 'method.notFound',
+       'metadata' => 
+      array (
+      ),
+    )),
+    2 => 
+    \PHPStan\Analyser\Error::__set_state(array(
+       'message' => 'Call to an undefined method ReflectionType::getName().',
+       'file' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\Console\\TestHuaweiObsCommandTest.php',
+       'line' => 125,
+       'canBeIgnored' => true,
+       'filePath' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\Console\\TestHuaweiObsCommandTest.php',
+       'traitFilePath' => NULL,
+       'tip' => NULL,
+       'nodeLine' => 125,
+       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
+       'identifier' => 'method.notFound',
+       'metadata' => 
+      array (
+      ),
+    )),
+    3 => 
+    \PHPStan\Analyser\Error::__set_state(array(
+       'message' => 'Call to an undefined method ReflectionType::getName().',
+       'file' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\Console\\TestHuaweiObsCommandTest.php',
+       'line' => 186,
+       'canBeIgnored' => true,
+       'filePath' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\Console\\TestHuaweiObsCommandTest.php',
+       'traitFilePath' => NULL,
+       'tip' => NULL,
+       'nodeLine' => 186,
+       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
+       'identifier' => 'method.notFound',
+       'metadata' => 
+      array (
+      ),
+    )),
+  ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php' => 
   array (
     0 => 
@@ -2945,8 +3012,9 @@ return [
     array (
       0 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\Console\\TestHuaweiObsCommand.php',
       1 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\HuaweiObsServiceProvider.php',
-      2 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterHelperMethodsTest.php',
-      3 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
+      2 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\Console\\TestHuaweiObsCommandTest.php',
+      3 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterHelperMethodsTest.php',
+      4 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\HuaweiObsServiceProvider.php' => 
@@ -2960,35 +3028,35 @@ return [
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\Console\\TestHuaweiObsCommandTest.php' => 
   array (
-    'fileHash' => '6d1a64747ae6209e7ddacf951a941afd7a5212af',
+    'fileHash' => 'fab19856e6a68fdf8bb23eda84aae3b50870a057',
     'dependentFiles' => 
     array (
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\ExceptionsTest.php' => 
   array (
-    'fileHash' => '4953f05a7910f34fea0ddcd399d2fee04ff7bff1',
+    'fileHash' => '93923bdf5b93541bcb71e6fa30586a28ed605024',
     'dependentFiles' => 
     array (
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterHelperMethodsTest.php' => 
   array (
-    'fileHash' => '883acb98eec6dfc011474704d4dbf4c12297d629',
+    'fileHash' => 'f8319fd8a332895f1df5e1dfc404ee22e41181b7',
     'dependentFiles' => 
     array (
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php' => 
   array (
-    'fileHash' => 'ddc9f834836a38d4174e36bb43ec12057cfcd882',
+    'fileHash' => '916f78a4e509b5e4bf0dcd49f2b2a0a1c6c64852',
     'dependentFiles' => 
     array (
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsServiceProviderTest.php' => 
   array (
-    'fileHash' => '689d3e888b2ded0cdb08c182e91cc79b8fcb1018',
+    'fileHash' => '160868e6cd779e41f7ebed5b2031683746672786',
     'dependentFiles' => 
     array (
     ),
@@ -5224,6 +5292,150 @@ return [
            'phpDoc' => NULL,
            'byRef' => false,
            'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        4 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_command_has_signature',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        5 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_get_adapter_with_valid_adapter',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        6 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_get_adapter_with_invalid_adapter',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        7 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_handle_method_exists',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        8 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_private_methods_exist',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        9 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_command_has_correct_properties',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        10 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_command_method_signatures',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        11 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'tearDown',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => false,
            'private' => false,
            'abstract' => false,
            'final' => false,
