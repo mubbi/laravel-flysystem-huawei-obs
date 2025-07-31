@@ -906,4 +906,179 @@ class HuaweiObsAdapterTest extends TestCase
         $result = $adapter->fileExists('test-file.txt');
         $this->assertTrue($result);
     }
+
+    public function test_authentication_cache_expiry(): void
+    {
+        // Create adapter with short cache time
+        $adapter = new HuaweiObsAdapter(
+            $this->accessKeyId,
+            $this->secretAccessKey,
+            $this->bucket,
+            $this->endpoint,
+            null,
+            null,
+            null,
+            3,
+            1,
+            false,
+            false,
+            true
+        );
+
+        // Replace with mock client
+        $reflection = new \ReflectionClass($adapter);
+        $clientProperty = $reflection->getProperty('client');
+        $clientProperty->setAccessible(true);
+        $clientProperty->setValue($adapter, $this->mockClient);
+
+        // Mock authentication check - should be called twice due to cache expiry
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->twice()
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        // Mock file existence check
+        $this->mockClient->shouldReceive('getObjectMetadata')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+            ])
+            ->twice()
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        // First call - should cache authentication
+        $result1 = $adapter->fileExists('test-file.txt');
+        $this->assertTrue($result1);
+
+        // Simulate cache expiry by setting authCacheExpiry to past
+        $authCacheProperty = $reflection->getProperty('authCacheExpiry');
+        $authCacheProperty->setAccessible(true);
+        $authCacheProperty->setValue($adapter, time() - 1);
+
+        // Second call - should re-authenticate
+        $result2 = $adapter->fileExists('test-file.txt');
+        $this->assertTrue($result2);
+    }
+
+    public function test_authentication_failure_with_access_denied(): void
+    {
+        $exception = new ObsException('AccessDenied');
+        $exception->setExceptionCode('AccessDenied');
+
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->andThrow($exception);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Authentication failed. Please check your Huawei OBS credentials');
+
+        $this->adapter->fileExists('test-file.txt');
+    }
+
+    public function test_authentication_failure_with_invalid_access_key(): void
+    {
+        $exception = new ObsException('InvalidAccessKeyId');
+        $exception->setExceptionCode('InvalidAccessKeyId');
+
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->andThrow($exception);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Authentication failed. Please check your Huawei OBS credentials');
+
+        $this->adapter->fileExists('test-file.txt');
+    }
+
+    public function test_authentication_failure_with_signature_mismatch(): void
+    {
+        $exception = new ObsException('SignatureDoesNotMatch');
+        $exception->setExceptionCode('SignatureDoesNotMatch');
+
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->andThrow($exception);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Authentication failed. Please check your Huawei OBS credentials');
+
+        $this->adapter->fileExists('test-file.txt');
+    }
+
+    public function test_authentication_failure_with_no_such_bucket(): void
+    {
+        $exception = new ObsException('NoSuchBucket');
+        $exception->setExceptionCode('NoSuchBucket');
+
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->andThrow($exception);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage("Bucket '{$this->bucket}' does not exist or you don't have access to it");
+
+        $this->adapter->fileExists('test-file.txt');
+    }
+
+    public function test_constructor_with_http_client(): void
+    {
+        $httpClient = new \GuzzleHttp\Client(['timeout' => 30]);
+
+        $adapter = new HuaweiObsAdapter(
+            $this->accessKeyId,
+            $this->secretAccessKey,
+            $this->bucket,
+            $this->endpoint,
+            null,
+            $httpClient,
+            null,
+            3,
+            1,
+            false,
+            false,
+            true
+        );
+
+        $this->assertInstanceOf(HuaweiObsAdapter::class, $adapter);
+    }
+
+    public function test_constructor_with_security_token(): void
+    {
+        $adapter = new HuaweiObsAdapter(
+            $this->accessKeyId,
+            $this->secretAccessKey,
+            $this->bucket,
+            $this->endpoint,
+            null,
+            null,
+            'test-token',
+            3,
+            1,
+            false,
+            false,
+            true
+        );
+
+        $this->assertInstanceOf(HuaweiObsAdapter::class, $adapter);
+    }
+
+    public function test_constructor_with_prefix(): void
+    {
+        $adapter = new HuaweiObsAdapter(
+            $this->accessKeyId,
+            $this->secretAccessKey,
+            $this->bucket,
+            $this->endpoint,
+            'test-prefix',
+            null,
+            null,
+            3,
+            1,
+            false,
+            false,
+            true
+        );
+
+        $this->assertInstanceOf(HuaweiObsAdapter::class, $adapter);
+    }
 }

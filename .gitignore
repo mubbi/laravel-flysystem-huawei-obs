@@ -73,6 +73,7 @@ coverage.html
 .php-cs-fixer.php
 .phpstan.neon.dist
 .phpstan.result.cache
+.phpstan/resultCache.php
 
 # =============================================================================
 # IDEs & Editors
