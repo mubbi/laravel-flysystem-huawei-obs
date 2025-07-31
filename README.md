@@ -1,6 +1,7 @@
 # Laravel Flysystem Huawei OBS Adapter
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/mubbi/laravel-flysystem-huawei-obs.svg?style=flat-square)](https://packagist.org/packages/mubbi/laravel-flysystem-huawei-obs)
+[![codecov](https://codecov.io/github/mubbi/laravel-flysystem-huawei-obs/graph/badge.svg?token=UQRPIGQORG)](https://codecov.io/github/mubbi/laravel-flysystem-huawei-obs)
 [![Total Downloads](https://img.shields.io/packagist/dt/mubbi/laravel-flysystem-huawei-obs.svg?style=flat-square)](https://packagist.org/packages/mubbi/laravel-flysystem-huawei-obs)
 [![GitHub CI](https://img.shields.io/github/actions/workflow/status/mubbi/laravel-flysystem-huawei-obs/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/mubbi/laravel-flysystem-huawei-obs/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/mubbi/laravel-flysystem-huawei-obs.svg?style=flat-square)](https://github.com/mubbi/laravel-flysystem-huawei-obs/blob/main/LICENSE)
