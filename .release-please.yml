@@ -1,0 +1,11 @@
+handleGHRelease: true
+releaseLabels:
+  - "release"
+  - "autorelease: pending"
+releaseType: php
+bumpMinorPreMajor: true
+bumpPatchForMinorPreMajor: true
+includeComponentInTag: false
+includeVInTag: true
+changelogPath: CHANGELOG.md
+updateVersion: true 

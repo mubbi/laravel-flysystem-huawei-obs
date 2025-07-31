@@ -1,0 +1,20 @@
+# PHPStan configuration for Laravel Flysystem Huawei OBS Adapter
+# @author  Mubbasher Ahmed <hello@mubbi.me>
+# @link    https://mubbi.me
+# @license MIT
+
+parameters:
+    level: 8
+    paths:
+        - src
+        - tests
+    excludePaths:
+        - tests/Fixtures
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true
+    ignoreErrors:
+        - '#Call to an undefined method [a-zA-Z0-9\\_]+::[a-zA-Z0-9\\_]+\(\)#'
+        - '#Mockery#'
+    tmpDir: .phpstan
+    parallel:
+        maximumNumberOfProcesses: 4 

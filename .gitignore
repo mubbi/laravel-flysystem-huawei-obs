@@ -1,0 +1,327 @@
+# Laravel Flysystem Huawei OBS Adapter
+# 
+# @author  Mubbasher Ahmed <hello@mubbi.me>
+# @link    https://mubbi.me
+# @license MIT
+# Comprehensive .gitignore file for PHP/Laravel projects
+
+# =============================================================================
+# PHP & Composer
+# =============================================================================
+
+# Composer dependencies
+/vendor/
+composer.phar
+composer.lock
+
+# PHP files
+*.php~
+*.php.bak
+*.php.swp
+*.php.swo
+
+# PHP configuration
+php.ini
+php.ini.bak
+
+# =============================================================================
+# Laravel Framework
+# =============================================================================
+
+# Laravel application files (if this becomes a full Laravel app)
+/bootstrap/cache/
+/storage/*.key
+/storage/logs/
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/views/
+/storage/app/public/
+/public/hot
+/public/storage
+/public/build
+
+# Laravel configuration
+.env
+.env.backup
+.env.production
+.env.local
+.env.staging
+.env.testing
+
+# Laravel cache
+.phpunit.result.cache
+
+# =============================================================================
+# Development & Testing
+# =============================================================================
+
+# PHPUnit
+.phpunit.cache/
+.phpunit.result.cache
+coverage/
+coverage.xml
+coverage.html
+*.coverage
+
+# Testing
+/tests/coverage/
+/tests/reports/
+/tests/tmp/
+
+# Development tools
+.php-cs-fixer.cache
+.php-cs-fixer.php
+.phpstan.neon.dist
+.phpstan.result.cache
+
+# =============================================================================
+# IDEs & Editors
+# =============================================================================
+
+# PhpStorm
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# Operating System
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.tmp
+*.temp
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# Build & Deployment
+# =============================================================================
+
+# Build artifacts
+/build/
+/dist/
+/out/
+
+# Deployment
+/deploy/
+/deployment/
+*.tar.gz
+*.zip
+
+# =============================================================================
+# Logs & Temporary Files
+# =============================================================================
+
+# Logs
+*.log
+logs/
+log/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Cache
+cache/
+.cache/
+
+# =============================================================================
+# Security & Sensitive Data
+# =============================================================================
+
+# Credentials & secrets
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+credentials/
+config/secrets.php
+
+# API keys and tokens
+.env.local
+.env.*.local
+.env.production
+.env.staging
+
+# =============================================================================
+# Documentation & Reports
+# =============================================================================
+
+# Generated documentation
+/docs/build/
+/docs/_build/
+/docs/api/
+
+# Reports
+reports/
+*.report
+*.analysis
+
+# =============================================================================
+# Package Specific
+# =============================================================================
+
+# Huawei OBS test files (if any are created during testing)
+test-*.txt
+test-*.jpg
+test-*.pdf
+
+# Configuration overrides
+config/huawei-obs.php
+
+# =============================================================================
+# Dependencies & Tools
+# =============================================================================
+
+# Node.js (if using any frontend tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Python (if using any Python tools)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# =============================================================================
+# Backup Files
+# =============================================================================
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.save
+
+# =============================================================================
+# Database
+# =============================================================================
+
+# SQLite
+*.sqlite
+*.sqlite3
+*.db
+
+# MySQL
+*.sql
+*.dump
+
+# =============================================================================
+# Docker
+# =============================================================================
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+docker-compose.override.yml
+.docker/
+
+# =============================================================================
+# CI/CD
+# =============================================================================
+
+# GitHub Actions
+.github/workflows/.env
+
+# GitLab CI
+.gitlab-ci.yml.local
+
+# =============================================================================
+# Misc
+# =============================================================================
+
+# Keep empty directories
+!.gitkeep
+!.gitignore
+
+# Keep example files
+!examples/
+!*.example
+!*.sample
+
+# Keep documentation
+!README.md
+!CHANGELOG.md
+!LICENSE
+!SECURITY.md
+!.github/CONTRIBUTING.md
+!.github/CODE_OF_CONDUCT.md
+!.github/SECURITY.md
+!.github/ISSUE_TEMPLATE/
+!.github/pull_request_template.md 
