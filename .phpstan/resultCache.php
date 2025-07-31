@@ -2752,6 +2752,102 @@ return [
       array (
       ),
     )),
+    51 => 
+    \PHPStan\Analyser\Error::__set_state(array(
+       'message' => 'Call to an undefined method Mockery\\ExpectationInterface|Mockery\\HigherOrderMessage::with().',
+       'file' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
+       'line' => 935,
+       'canBeIgnored' => true,
+       'filePath' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
+       'traitFilePath' => NULL,
+       'tip' => NULL,
+       'nodeLine' => 935,
+       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
+       'identifier' => 'method.notFound',
+       'metadata' => 
+      array (
+      ),
+    )),
+    52 => 
+    \PHPStan\Analyser\Error::__set_state(array(
+       'message' => 'Call to an undefined method Mockery\\ExpectationInterface|Mockery\\HigherOrderMessage::with().',
+       'file' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
+       'line' => 941,
+       'canBeIgnored' => true,
+       'filePath' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
+       'traitFilePath' => NULL,
+       'tip' => NULL,
+       'nodeLine' => 941,
+       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
+       'identifier' => 'method.notFound',
+       'metadata' => 
+      array (
+      ),
+    )),
+    53 => 
+    \PHPStan\Analyser\Error::__set_state(array(
+       'message' => 'Call to an undefined method Mockery\\ExpectationInterface|Mockery\\HigherOrderMessage::with().',
+       'file' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
+       'line' => 968,
+       'canBeIgnored' => true,
+       'filePath' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
+       'traitFilePath' => NULL,
+       'tip' => NULL,
+       'nodeLine' => 968,
+       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
+       'identifier' => 'method.notFound',
+       'metadata' => 
+      array (
+      ),
+    )),
+    54 => 
+    \PHPStan\Analyser\Error::__set_state(array(
+       'message' => 'Call to an undefined method Mockery\\ExpectationInterface|Mockery\\HigherOrderMessage::with().',
+       'file' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
+       'line' => 983,
+       'canBeIgnored' => true,
+       'filePath' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
+       'traitFilePath' => NULL,
+       'tip' => NULL,
+       'nodeLine' => 983,
+       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
+       'identifier' => 'method.notFound',
+       'metadata' => 
+      array (
+      ),
+    )),
+    55 => 
+    \PHPStan\Analyser\Error::__set_state(array(
+       'message' => 'Call to an undefined method Mockery\\ExpectationInterface|Mockery\\HigherOrderMessage::with().',
+       'file' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
+       'line' => 998,
+       'canBeIgnored' => true,
+       'filePath' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
+       'traitFilePath' => NULL,
+       'tip' => NULL,
+       'nodeLine' => 998,
+       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
+       'identifier' => 'method.notFound',
+       'metadata' => 
+      array (
+      ),
+    )),
+    56 => 
+    \PHPStan\Analyser\Error::__set_state(array(
+       'message' => 'Call to an undefined method Mockery\\ExpectationInterface|Mockery\\HigherOrderMessage::with().',
+       'file' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
+       'line' => 1013,
+       'canBeIgnored' => true,
+       'filePath' => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
+       'traitFilePath' => NULL,
+       'tip' => NULL,
+       'nodeLine' => 1013,
+       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
+       'identifier' => 'method.notFound',
+       'metadata' => 
+      array (
+      ),
+    )),
   ),
 ); },
 	'locallyIgnoredErrorsCallback' => static function (): array { return array (
@@ -2769,6 +2865,8 @@ return [
     'dependentFiles' => 
     array (
       0 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\HuaweiObsServiceProvider.php',
+      1 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\Console\\TestHuaweiObsCommandTest.php',
+      2 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsServiceProviderTest.php',
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\Exceptions\\HuaweiObsException.php' => 
@@ -2783,6 +2881,7 @@ return [
       4 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\Exceptions\\UnableToRestoreObject.php',
       5 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\Exceptions\\UnableToSetObjectTags.php',
       6 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\HuaweiObsAdapter.php',
+      7 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\ExceptionsTest.php',
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\Exceptions\\UnableToCreatePostSignature.php' => 
@@ -2791,6 +2890,7 @@ return [
     'dependentFiles' => 
     array (
       0 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\HuaweiObsAdapter.php',
+      1 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\ExceptionsTest.php',
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\Exceptions\\UnableToCreateSignedUrl.php' => 
@@ -2799,6 +2899,7 @@ return [
     'dependentFiles' => 
     array (
       0 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\HuaweiObsAdapter.php',
+      1 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\ExceptionsTest.php',
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\Exceptions\\UnableToDeleteObjectTags.php' => 
@@ -2807,6 +2908,7 @@ return [
     'dependentFiles' => 
     array (
       0 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\HuaweiObsAdapter.php',
+      1 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\ExceptionsTest.php',
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\Exceptions\\UnableToGetObjectTags.php' => 
@@ -2815,6 +2917,7 @@ return [
     'dependentFiles' => 
     array (
       0 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\HuaweiObsAdapter.php',
+      1 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\ExceptionsTest.php',
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\Exceptions\\UnableToRestoreObject.php' => 
@@ -2823,6 +2926,7 @@ return [
     'dependentFiles' => 
     array (
       0 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\HuaweiObsAdapter.php',
+      1 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\ExceptionsTest.php',
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\Exceptions\\UnableToSetObjectTags.php' => 
@@ -2831,6 +2935,7 @@ return [
     'dependentFiles' => 
     array (
       0 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\HuaweiObsAdapter.php',
+      1 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\ExceptionsTest.php',
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\HuaweiObsAdapter.php' => 
@@ -2840,7 +2945,8 @@ return [
     array (
       0 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\Console\\TestHuaweiObsCommand.php',
       1 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\HuaweiObsServiceProvider.php',
-      2 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
+      2 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterHelperMethodsTest.php',
+      3 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php',
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\src\\HuaweiObsServiceProvider.php' => 
@@ -2848,19 +2954,41 @@ return [
     'fileHash' => 'c39c2dc236dcc9cc7834d46a12668799ffeb604d',
     'dependentFiles' => 
     array (
-      0 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsServiceProviderTest.php',
+      0 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\Console\\TestHuaweiObsCommandTest.php',
+      1 => 'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsServiceProviderTest.php',
+    ),
+  ),
+  'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\Console\\TestHuaweiObsCommandTest.php' => 
+  array (
+    'fileHash' => '6d1a64747ae6209e7ddacf951a941afd7a5212af',
+    'dependentFiles' => 
+    array (
+    ),
+  ),
+  'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\ExceptionsTest.php' => 
+  array (
+    'fileHash' => '4953f05a7910f34fea0ddcd399d2fee04ff7bff1',
+    'dependentFiles' => 
+    array (
+    ),
+  ),
+  'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterHelperMethodsTest.php' => 
+  array (
+    'fileHash' => '883acb98eec6dfc011474704d4dbf4c12297d629',
+    'dependentFiles' => 
+    array (
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php' => 
   array (
-    'fileHash' => '4d8def1c06c40ffcfad398a1d81380e760f101e4',
+    'fileHash' => 'ddc9f834836a38d4174e36bb43ec12057cfcd882',
     'dependentFiles' => 
     array (
     ),
   ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsServiceProviderTest.php' => 
   array (
-    'fileHash' => 'e32a3912957ac7ddc0721aa60c4a8ee2c655eea5',
+    'fileHash' => '689d3e888b2ded0cdb08c182e91cc79b8fcb1018',
     'dependentFiles' => 
     array (
     ),
@@ -4994,6 +5122,556 @@ return [
       ),
     )),
   ),
+  'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\Console\\TestHuaweiObsCommandTest.php' => 
+  array (
+    0 => 
+    \PHPStan\Dependency\ExportedNode\ExportedClassNode::__set_state(array(
+       'name' => 'LaravelFlysystemHuaweiObs\\Tests\\Console\\TestHuaweiObsCommandTest',
+       'phpDoc' => NULL,
+       'abstract' => false,
+       'final' => false,
+       'extends' => 'Orchestra\\Testbench\\TestCase',
+       'implements' => 
+      array (
+      ),
+       'usedTraits' => 
+      array (
+      ),
+       'traitUseAdaptations' => 
+      array (
+      ),
+       'statements' => 
+      array (
+        0 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'getPackageProviders',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => false,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'array',
+           'parameters' => 
+          array (
+            0 => 
+            \PHPStan\Dependency\ExportedNode\ExportedParameterNode::__set_state(array(
+               'name' => 'app',
+               'type' => NULL,
+               'byRef' => false,
+               'variadic' => false,
+               'hasDefault' => false,
+               'attributes' => 
+              array (
+              ),
+            )),
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        1 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'getEnvironmentSetUp',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => false,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+            0 => 
+            \PHPStan\Dependency\ExportedNode\ExportedParameterNode::__set_state(array(
+               'name' => 'app',
+               'type' => NULL,
+               'byRef' => false,
+               'variadic' => false,
+               'hasDefault' => false,
+               'attributes' => 
+              array (
+              ),
+            )),
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        2 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_command_instantiation',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        3 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_command_has_description',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+      ),
+       'attributes' => 
+      array (
+      ),
+    )),
+  ),
+  'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\ExceptionsTest.php' => 
+  array (
+    0 => 
+    \PHPStan\Dependency\ExportedNode\ExportedClassNode::__set_state(array(
+       'name' => 'LaravelFlysystemHuaweiObs\\Tests\\ExceptionsTest',
+       'phpDoc' => NULL,
+       'abstract' => false,
+       'final' => false,
+       'extends' => 'PHPUnit\\Framework\\TestCase',
+       'implements' => 
+      array (
+      ),
+       'usedTraits' => 
+      array (
+      ),
+       'traitUseAdaptations' => 
+      array (
+      ),
+       'statements' => 
+      array (
+        0 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_huawei_obs_exception_implements_filesystem_exception',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        1 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_unable_to_create_signed_url_exception',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        2 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_unable_to_create_signed_url_exception_without_previous',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        3 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_unable_to_create_post_signature_exception',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        4 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_unable_to_set_object_tags_exception',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        5 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_unable_to_get_object_tags_exception',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        6 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_unable_to_delete_object_tags_exception',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        7 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_unable_to_restore_object_exception',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+      ),
+       'attributes' => 
+      array (
+      ),
+    )),
+  ),
+  'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterHelperMethodsTest.php' => 
+  array (
+    0 => 
+    \PHPStan\Dependency\ExportedNode\ExportedClassNode::__set_state(array(
+       'name' => 'LaravelFlysystemHuaweiObs\\Tests\\HuaweiObsAdapterHelperMethodsTest',
+       'phpDoc' => NULL,
+       'abstract' => false,
+       'final' => false,
+       'extends' => 'PHPUnit\\Framework\\TestCase',
+       'implements' => 
+      array (
+      ),
+       'usedTraits' => 
+      array (
+      ),
+       'traitUseAdaptations' => 
+      array (
+      ),
+       'statements' => 
+      array (
+        0 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'setUp',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => false,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        1 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_get_key_without_prefix',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        2 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_get_key_with_prefix',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        3 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_get_relative_path_without_prefix',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        4 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_get_relative_path_with_prefix',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        5 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_visibility_to_acl',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        6 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_acl_to_visibility_with_public_read',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        7 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_acl_to_visibility_with_read_acp',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        8 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_acl_to_visibility_with_private',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        9 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_acl_to_visibility_with_unknown_uri',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        10 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_acl_to_visibility_with_empty_grants',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        11 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_acl_to_visibility_with_missing_grantee_uri',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        12 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_acl_to_visibility_with_missing_permission',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+      ),
+       'attributes' => 
+      array (
+      ),
+    )),
+  ),
   'E:\\Freelancer\\laravel-flysystem-huawei-obs\\tests\\HuaweiObsAdapterTest.php' => 
   array (
     0 => 
@@ -5824,6 +6502,150 @@ return [
           array (
           ),
         )),
+        45 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_authentication_cache_expiry',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        46 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_authentication_failure_with_access_denied',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        47 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_authentication_failure_with_invalid_access_key',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        48 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_authentication_failure_with_signature_mismatch',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        49 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_authentication_failure_with_no_such_bucket',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        50 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_constructor_with_http_client',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        51 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_constructor_with_security_token',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        52 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_constructor_with_prefix',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
       ),
        'attributes' => 
       array (
@@ -5947,6 +6769,204 @@ return [
         4 => 
         \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
            'name' => 'test_huawei_obs_disk_with_http_client_config',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        5 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_huawei_obs_disk_with_security_token',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        6 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_huawei_obs_disk_with_retry_config',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        7 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_huawei_obs_disk_with_logging_config',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        8 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_huawei_obs_disk_missing_required_config_throws_exception',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        9 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_huawei_obs_disk_missing_secret_throws_exception',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        10 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_huawei_obs_disk_missing_bucket_throws_exception',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        11 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_huawei_obs_disk_missing_endpoint_throws_exception',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        12 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_huawei_obs_disk_invalid_endpoint_throws_exception',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        13 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_huawei_obs_disk_with_empty_endpoint_throws_exception',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        14 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_service_provider_registers_commands_in_console',
+           'phpDoc' => NULL,
+           'byRef' => false,
+           'public' => true,
+           'private' => false,
+           'abstract' => false,
+           'final' => false,
+           'static' => false,
+           'returnType' => 'void',
+           'parameters' => 
+          array (
+          ),
+           'attributes' => 
+          array (
+          ),
+        )),
+        15 => 
+        \PHPStan\Dependency\ExportedNode\ExportedMethodNode::__set_state(array(
+           'name' => 'test_service_provider_publishes_config',
            'phpDoc' => NULL,
            'byRef' => false,
            'public' => true,
