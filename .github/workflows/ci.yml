@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: [ main ]
   
-permissions:
-  contents: read
-  pull-requests: write
-  
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -92,48 +88,6 @@ jobs:
 
     - name: Run Laravel Pint
       run: vendor/bin/pint --test
-
-  commitlint:
-    runs-on: ubuntu-latest
-    name: Conventional Commits Linter
-    if: github.event_name == 'pull_request'
-
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Lint pull request title
-      uses: amannn/action-semantic-pull-request@v5
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        wip: true
-        types: |
-          feat
-          fix
-          docs
-          style
-          refactor
-          perf
-          test
-          chore
-          ci
-          build
-          revert
-        scopes: |
-          adapter
-          service-provider
-          exceptions
-          config
-          readme
-          ci
-          tests
-          examples
-          deps
-          release
-        requireScope: false
-
   commitlint-push:
     runs-on: ubuntu-latest
     name: Validate Commit Messages
