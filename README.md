@@ -7,8 +7,19 @@
 [![License](https://img.shields.io/github/license/mubbi/laravel-flysystem-huawei-obs.svg?style=flat-square)](https://github.com/mubbi/laravel-flysystem-huawei-obs/blob/main/LICENSE)
 [![PHP Version](https://img.shields.io/packagist/php-v/mubbi/laravel-flysystem-huawei-obs.svg?style=flat-square)](https://packagist.org/packages/mubbi/laravel-flysystem-huawei-obs)
 [![Laravel Version](https://img.shields.io/badge/Laravel-9%2B-red.svg?style=flat-square)](https://laravel.com)
+[![Flysystem Version](https://img.shields.io/badge/Flysystem-v2%20%7C%20v3-blue.svg?style=flat-square)](https://flysystem.thephpleague.com/)
+[![Guzzle Version](https://img.shields.io/badge/Guzzle-v6%20%7C%20v7%20%7C%20v8-green.svg?style=flat-square)](https://docs.guzzlephp.org/)
 
-A Laravel Flysystem v3 adapter for Huawei Object Storage Service (OBS). This package provides seamless integration between Laravel's filesystem abstraction and Huawei Cloud OBS, allowing you to use Huawei OBS as a storage backend in your Laravel applications.
+A Laravel Flysystem v2/v3 adapter for Huawei Object Storage Service (OBS). This package provides seamless integration between Laravel's filesystem abstraction and Huawei Cloud OBS, allowing you to use Huawei OBS as a storage backend in your Laravel applications.
+
+## Multi-Version Compatibility
+
+This package now supports multiple versions of both Flysystem and Guzzle:
+
+- **Flysystem**: v3.0+ (primary) with v2.0+ compatibility through dependency constraints
+- **Guzzle**: v6.3.0+, v7.0+, and v8.0+ (automatic detection)
+- **Laravel**: 9.0+, 10.0+, 11.0+, and 12.0+
+- **PHP**: 8.1+
 
 ## Features
 
@@ -47,9 +58,22 @@ This package includes robust security features:
 
 - PHP 8.1+
 - Laravel 9.0+ (supports Laravel 9, 10, 11, and 12)
+- Flysystem v3.0+ (primary) with v2.0+ compatibility
+- Guzzle v6.3.0+, v7.0+, or v8.0+ (automatic detection)
 - Huawei Cloud OBS account and credentials
 
 ## Installation
+
+### Version Compatibility
+
+This package automatically detects and adapts to your installed versions of Guzzle:
+
+- **Guzzle v6**: Uses v6-specific client configurations
+- **Guzzle v7/v8**: Uses modern client configurations
+
+For Flysystem, the package uses v3 as the primary interface but maintains compatibility with v2 through dependency constraints. The package will automatically choose the correct HTTP client configuration based on your installed Guzzle version.
+
+### Installation Steps
 
 1. Install the package via Composer:
 

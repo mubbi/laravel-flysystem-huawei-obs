@@ -17,7 +17,6 @@ declare(strict_types=1);
 
 namespace LaravelFlysystemHuaweiObs;
 
-use GuzzleHttp\Client;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
@@ -64,7 +63,7 @@ class HuaweiObsServiceProvider extends ServiceProvider
                 $config['bucket'],
                 $config['endpoint'],
                 $config['prefix'] ?? null,
-                $this->createHttpClient($config),
+                HttpClientFactory::create($config['http_client'] ?? []),
                 $config['security_token'] ?? null,
                 $config['retry_attempts'] ?? 3,
                 $config['retry_delay'] ?? 1,
@@ -79,25 +78,5 @@ class HuaweiObsServiceProvider extends ServiceProvider
                 $config
             );
         });
-    }
-
-    /**
-     * @param  array<string, mixed>  $config
-     */
-    private function createHttpClient(array $config): ?Client
-    {
-        if (! isset($config['http_client'])) {
-            return null;
-        }
-
-        $httpConfig = $config['http_client'];
-
-        return new Client([
-            'timeout' => $httpConfig['timeout'] ?? 30,
-            'connect_timeout' => $httpConfig['connect_timeout'] ?? 10,
-            'verify' => $httpConfig['verify'] ?? true,
-            'proxy' => $httpConfig['proxy'] ?? null,
-            'headers' => $httpConfig['headers'] ?? [],
-        ]);
     }
 }
