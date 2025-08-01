@@ -22,7 +22,7 @@
     "require": {
         "php": "^8.2",
         "league/flysystem": "^3.0",
-        "laravel/framework": "^11.0",
+        "laravel/framework": ">=11.0",
         "obs/esdk-obs-php": "^3.0",
         "guzzlehttp/guzzle": "^7.0"
     },
