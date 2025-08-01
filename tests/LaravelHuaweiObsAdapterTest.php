@@ -770,11 +770,13 @@ class LaravelHuaweiObsAdapterTest extends TestCase
                         'Key' => 'file1.txt',
                         'Size' => 100,
                         'LastModified' => '2023-01-01T00:00:00Z',
+                        'Grants' => [],
                     ],
                     [
                         'Key' => 'file2.txt',
                         'Size' => 200,
                         'LastModified' => '2023-01-02T00:00:00Z',
+                        'Grants' => [],
                     ],
                 ],
             ]);
@@ -870,19 +872,475 @@ class LaravelHuaweiObsAdapterTest extends TestCase
 
     public function test_get_visibility_method_throws_exception_on_error(): void
     {
-        $exception = new ObsException('AccessDenied');
-        $exception->setExceptionCode('AccessDenied');
-
         $this->mockClient->shouldReceive('getObjectAcl')
             ->with([
                 'Bucket' => $this->bucket,
                 'Key' => 'test-file.txt',
             ])
             ->once()
-            ->andThrow($exception);
+            ->andThrow(new ObsException('AccessDenied'));
 
-        $this->expectException(\League\Flysystem\UnableToRetrieveMetadata::class);
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Unable to retrieve the visibility for file at location: test-file.txt. AccessDenied');
 
         $this->adapter->getVisibility('test-file.txt');
+    }
+
+    // ============================================================================
+    // TESTS FOR NEW OPTIMIZED METHODS IN LARAVEL ADAPTER
+    // ============================================================================
+
+    public function test_all_files_optimized_delegates_to_base_adapter(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 100,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'file1.txt',
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                        'Grants' => [],
+                    ],
+                    [
+                        'Key' => 'file2.jpg',
+                        'Size' => 200,
+                        'LastModified' => '2023-01-02T00:00:00Z',
+                        'Grants' => [],
+                    ],
+                ],
+            ]);
+
+        $files = $this->adapter->allFilesOptimized(100, 30);
+
+        $this->assertCount(2, $files);
+        $this->assertContains('file1.txt', $files);
+        $this->assertContains('file2.jpg', $files);
+    }
+
+    public function test_all_directories_optimized_delegates_to_base_adapter(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 100,
+            ])
+            ->once()
+            ->andReturn([
+                'CommonPrefixes' => [
+                    ['Prefix' => 'directory1/'],
+                    ['Prefix' => 'directory2/'],
+                ],
+            ]);
+
+        $directories = $this->adapter->allDirectoriesOptimized(100, 30);
+
+        $this->assertCount(2, $directories);
+        $this->assertContains('directory1', $directories);
+        $this->assertContains('directory2', $directories);
+    }
+
+    public function test_get_storage_stats_delegates_to_base_adapter(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'file1.txt',
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                        'Grants' => [],
+                    ],
+                    [
+                        'Key' => 'file2.jpg',
+                        'Size' => 200,
+                        'LastModified' => '2023-01-02T00:00:00Z',
+                        'Grants' => [],
+                    ],
+                ],
+                'CommonPrefixes' => [
+                    ['Prefix' => 'directory1/'],
+                ],
+            ]);
+
+        $stats = $this->adapter->getStorageStats();
+
+        $this->assertEquals(2, $stats['total_files']);
+        $this->assertEquals(1, $stats['total_directories']);
+        $this->assertEquals(300, $stats['total_size_bytes']);
+        $this->assertEquals(['txt' => 1, 'jpg' => 1], $stats['file_types']);
+        $this->assertEquals(3, $stats['processed_count']);
+        $this->assertArrayHasKey('processing_time_seconds', $stats);
+        $this->assertFalse($stats['has_more_files']);
+    }
+
+    public function test_list_contents_optimized_delegates_to_base_adapter(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => 'test/',
+                'Delimiter' => null,
+                'MaxKeys' => 500,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'test/file1.txt',
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ],
+                ],
+            ]);
+
+        $contents = iterator_to_array($this->adapter->listContentsOptimized('test', true, 500, 30));
+
+        $this->assertCount(1, $contents);
+        $this->assertInstanceOf(\League\Flysystem\FileAttributes::class, $contents[0]);
+        $this->assertEquals('test/file1.txt', $contents[0]->path()); // Full path is returned
+    }
+
+    // ============================================================================
+    // EDGE CASES FOR LARAVEL ADAPTER
+    // ============================================================================
+
+    public function test_all_files_optimized_with_zero_limits(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000, // Should use default when maxKeys is 0
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'file1.txt',
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ],
+                ],
+            ]);
+
+        $files = $this->adapter->allFilesOptimized(0, 0);
+
+        $this->assertCount(1, $files);
+        $this->assertContains('file1.txt', $files);
+    }
+
+    public function test_get_storage_stats_with_custom_limits(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 500,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'file1.txt',
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ],
+                ],
+            ]);
+
+        $stats = $this->adapter->getStorageStats(500, 10);
+
+        $this->assertEquals(1, $stats['total_files']);
+        $this->assertEquals(100, $stats['total_size_bytes']);
+        $this->assertFalse($stats['has_more_files']); // Only 1 file processed, not reaching limit
+    }
+
+    public function test_list_contents_optimized_with_empty_response(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => 'empty/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([]);
+
+        $contents = iterator_to_array($this->adapter->listContentsOptimized('empty', true));
+
+        $this->assertCount(0, $contents);
+    }
+
+    public function test_all_files_optimized_handles_api_errors(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 100,
+            ])
+            ->once()
+            ->andThrow(new ObsException('API Error'));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Unable to list contents: API Error');
+
+        $this->adapter->allFilesOptimized(100, 30);
+    }
+
+    public function test_get_storage_stats_handles_api_errors(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andThrow(new ObsException('AccessDenied'));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Unable to list contents: AccessDenied');
+
+        $this->adapter->getStorageStats();
+    }
+
+    public function test_list_contents_optimized_handles_authentication_errors(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => 'test/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andThrow(new ObsException('InvalidAccessKeyId'));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Unable to list contents: InvalidAccessKeyId');
+
+        iterator_to_array($this->adapter->listContentsOptimized('test', true));
+    }
+
+    // ============================================================================
+    // PERFORMANCE TESTS FOR LARAVEL ADAPTER
+    // ============================================================================
+
+    public function test_all_files_optimized_performance(): void
+    {
+        $startTime = microtime(true);
+
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => array_map(function ($i) {
+                    return [
+                        'Key' => "file{$i}.txt",
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ];
+                }, range(1, 1000)),
+            ]);
+
+        $files = $this->adapter->allFilesOptimized(1000, 60);
+
+        $endTime = microtime(true);
+        $executionTime = $endTime - $startTime;
+
+        $this->assertCount(1000, $files);
+        // Should complete within 1 second for 1000 files
+        $this->assertLessThan(1.0, $executionTime);
+    }
+
+    public function test_get_storage_stats_performance(): void
+    {
+        $startTime = microtime(true);
+
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => array_map(function ($i) {
+                    return [
+                        'Key' => "file{$i}.txt",
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ];
+                }, range(1, 1000)),
+            ]);
+
+        $stats = $this->adapter->getStorageStats(1000, 60);
+
+        $endTime = microtime(true);
+        $executionTime = $endTime - $startTime;
+
+        $this->assertEquals(1000, $stats['total_files']);
+        $this->assertEquals(100000, $stats['total_size_bytes']);
+        // Should complete within 1 second for 1000 files
+        $this->assertLessThan(1.0, $executionTime);
+    }
+
+    // ============================================================================
+    // INTEGRATION TESTS - REAL-WORLD SCENARIOS
+    // ============================================================================
+
+    public function test_complete_file_browser_scenario(): void
+    {
+        // Simulate a real file browser scenario
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => 'uploads/',
+                'Delimiter' => '/',
+                'MaxKeys' => 1000,
+            ])
+            ->twice() // Called twice: once for files/directories, once for getStorageStats
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'uploads/file1.txt',
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                        'Grants' => [],
+                    ],
+                    [
+                        'Key' => 'uploads/file2.jpg',
+                        'Size' => 200,
+                        'LastModified' => '2023-01-02T00:00:00Z',
+                        'Grants' => [],
+                    ],
+                ],
+                'CommonPrefixes' => [
+                    ['Prefix' => 'uploads/subdir/'],
+                ],
+            ]);
+
+        // Add mock for getStorageStats call
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'uploads/file1.txt',
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ],
+                    [
+                        'Key' => 'uploads/file2.jpg',
+                        'Size' => 200,
+                        'LastModified' => '2023-01-02T00:00:00Z',
+                    ],
+                ],
+                'CommonPrefixes' => [
+                    ['Prefix' => 'uploads/subdir/'],
+                ],
+            ]);
+
+        // Test files method
+        $files = $this->adapter->files('uploads');
+        $this->assertCount(2, $files);
+        $this->assertContains('uploads/file1.txt', $files);
+        $this->assertContains('uploads/file2.jpg', $files);
+
+        // Test directories method
+        $directories = $this->adapter->directories('uploads');
+        $this->assertCount(1, $directories);
+        $this->assertContains('uploads/subdir', $directories);
+
+        // Test optimized methods
+        $stats = $this->adapter->getStorageStats(1000, 30);
+        $this->assertEquals(2, $stats['total_files']);
+        $this->assertEquals(1, $stats['total_directories']);
+        $this->assertEquals(300, $stats['total_size_bytes']);
+    }
+
+    public function test_large_dataset_processing_scenario(): void
+    {
+        // Simulate processing a large dataset with limits
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 100,
+            ])
+            ->twice() // Called twice: once for allFilesOptimized, once for getStorageStats
+            ->andReturn([
+                'Contents' => array_map(function ($i) {
+                    return [
+                        'Key' => "large-dataset/file{$i}.txt",
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ];
+                }, range(1, 100)),
+            ]);
+
+        // Test with limits to prevent timeouts
+        $files = $this->adapter->allFilesOptimized(100, 10);
+        $this->assertCount(100, $files);
+
+        // Test storage stats with limits
+        $stats = $this->adapter->getStorageStats(100, 10);
+        $this->assertEquals(100, $stats['total_files']);
+        $this->assertEquals(10000, $stats['total_size_bytes']);
+        $this->assertTrue($stats['has_more_files']); // Indicates there might be more files
+    }
+
+    public function test_error_recovery_scenario(): void
+    {
+        // Test that the adapter gracefully handles errors and provides useful information
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andThrow(new ObsException('NoSuchBucket'));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Unable to list contents: NoSuchBucket');
+
+        $this->adapter->getStorageStats();
     }
 }

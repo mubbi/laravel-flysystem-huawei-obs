@@ -1678,10 +1678,6 @@ class HuaweiObsAdapterTest extends TestCase
 
     public function test_write_with_visibility_and_mime_type(): void
     {
-        $this->mockClient->shouldReceive('headBucket')
-            ->with(['Bucket' => $this->bucket])
-            ->andReturn(['HttpStatusCode' => 200]);
-
         $this->mockClient->shouldReceive('putObject')
             ->with([
                 'Bucket' => $this->bucket,
@@ -1694,11 +1690,352 @@ class HuaweiObsAdapterTest extends TestCase
             ->andReturn(['HttpStatusCode' => 200]);
 
         $config = new Config([
-            'visibility' => Visibility::PUBLIC,
+            'visibility' => 'public',
             'mimetype' => 'text/plain',
         ]);
 
         $this->adapter->write('test-file.txt', 'test content', $config);
-        $this->assertTrue(true); // Assert that no exception was thrown
+
+        $this->assertTrue(true); // Assertion to avoid risky test
+    }
+
+    // ============================================================================
+    // ADDITIONAL EDGE CASES AND CRITICAL SCENARIOS
+    // ============================================================================
+
+    public function test_list_contents_with_pagination_and_markers(): void
+    {
+        // First page
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'file1.txt',
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ],
+                ],
+                'NextMarker' => 'file1.txt',
+            ]);
+
+        // Second page
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+                'Marker' => 'file1.txt',
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'file2.txt',
+                        'Size' => 200,
+                        'LastModified' => '2023-01-02T00:00:00Z',
+                    ],
+                ],
+                // No NextMarker - pagination ends
+            ]);
+
+        $contents = iterator_to_array($this->adapter->listContents('', true));
+
+        $this->assertCount(2, $contents);
+        $this->assertInstanceOf(FileAttributes::class, $contents[0]);
+        $this->assertInstanceOf(FileAttributes::class, $contents[1]);
+        $this->assertEquals('file1.txt', $contents[0]->path());
+        $this->assertEquals('file2.txt', $contents[1]->path());
+    }
+
+    public function test_list_contents_handles_malformed_api_response(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'file1.txt',
+                        // Missing Size and LastModified
+                    ],
+                ],
+            ]);
+
+        $contents = iterator_to_array($this->adapter->listContents('', true));
+
+        $this->assertCount(1, $contents);
+        $this->assertInstanceOf(FileAttributes::class, $contents[0]);
+        $this->assertEquals('file1.txt', $contents[0]->path());
+        // Should handle missing metadata gracefully
+        $this->assertEquals(0, $contents[0]->fileSize());
+    }
+
+    public function test_list_contents_handles_mixed_content_types(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'file1.txt',
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ],
+                ],
+                'CommonPrefixes' => [
+                    ['Prefix' => 'directory1/'],
+                ],
+            ]);
+
+        $contents = iterator_to_array($this->adapter->listContents('', true));
+
+        $this->assertCount(2, $contents);
+        $this->assertInstanceOf(FileAttributes::class, $contents[0]);
+        $this->assertInstanceOf(DirectoryAttributes::class, $contents[1]);
+        $this->assertEquals('file1.txt', $contents[0]->path());
+        $this->assertEquals('directory1', $contents[1]->path());
+    }
+
+    public function test_list_contents_with_prefix_and_delimiter(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => 'uploads/',
+                'Delimiter' => '/',
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'uploads/file1.txt',
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ],
+                ],
+                'CommonPrefixes' => [
+                    ['Prefix' => 'uploads/subdir/'],
+                ],
+            ]);
+
+        $contents = iterator_to_array($this->adapter->listContents('uploads', false));
+
+        $this->assertCount(2, $contents);
+        $this->assertInstanceOf(FileAttributes::class, $contents[0]);
+        $this->assertInstanceOf(DirectoryAttributes::class, $contents[1]);
+        $this->assertEquals('uploads/file1.txt', $contents[0]->path()); // Full path is returned
+        $this->assertEquals('uploads/subdir', $contents[1]->path()); // Full path is returned
+    }
+
+    public function test_list_contents_handles_empty_bucket(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([]);
+
+        $contents = iterator_to_array($this->adapter->listContents('', true));
+
+        $this->assertCount(0, $contents);
+    }
+
+    public function test_list_contents_handles_large_file_sizes(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'large-file.zip',
+                        'Size' => 2147483647, // Max 32-bit integer
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ],
+                ],
+            ]);
+
+        $contents = iterator_to_array($this->adapter->listContents('', true));
+
+        $this->assertCount(1, $contents);
+        $this->assertEquals(2147483647, $contents[0]->fileSize());
+    }
+
+    public function test_list_contents_handles_special_characters_in_keys(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'file with spaces.txt',
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ],
+                    [
+                        'Key' => 'file-with-unicode-émojis-🚀.txt',
+                        'Size' => 200,
+                        'LastModified' => '2023-01-02T00:00:00Z',
+                    ],
+                ],
+            ]);
+
+        $contents = iterator_to_array($this->adapter->listContents('', true));
+
+        $this->assertCount(2, $contents);
+        $this->assertEquals('file with spaces.txt', $contents[0]->path());
+        $this->assertEquals('file-with-unicode-émojis-🚀.txt', $contents[1]->path());
+    }
+
+    public function test_list_contents_handles_nested_directories(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'level1/level2/level3/file.txt',
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ],
+                ],
+                'CommonPrefixes' => [
+                    ['Prefix' => 'level1/'],
+                    ['Prefix' => 'level1/level2/'],
+                ],
+            ]);
+
+        $contents = iterator_to_array($this->adapter->listContents('', true));
+
+        $this->assertCount(3, $contents);
+        $this->assertInstanceOf(FileAttributes::class, $contents[0]);
+        $this->assertInstanceOf(DirectoryAttributes::class, $contents[1]);
+        $this->assertInstanceOf(DirectoryAttributes::class, $contents[2]);
+        $this->assertEquals('level1/level2/level3/file.txt', $contents[0]->path());
+        $this->assertEquals('level1', $contents[1]->path());
+        $this->assertEquals('level1/level2', $contents[2]->path());
+    }
+
+    public function test_list_contents_handles_duplicate_common_prefixes(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'CommonPrefixes' => [
+                    ['Prefix' => 'directory1/'],
+                    ['Prefix' => 'directory1/'], // Duplicate prefix
+                ],
+            ]);
+
+        $contents = iterator_to_array($this->adapter->listContents('', true));
+
+        // Should only return one instance of the duplicate
+        $this->assertCount(1, $contents);
+        $this->assertInstanceOf(DirectoryAttributes::class, $contents[0]);
+        $this->assertEquals('directory1', $contents[0]->path());
+    }
+
+    public function test_list_contents_handles_malformed_timestamps(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'file1.txt',
+                        'Size' => 100,
+                        'LastModified' => 'invalid-date', // Malformed timestamp
+                    ],
+                ],
+            ]);
+
+        $contents = iterator_to_array($this->adapter->listContents('', true));
+
+        $this->assertCount(1, $contents);
+        $this->assertInstanceOf(FileAttributes::class, $contents[0]);
+        // Should handle malformed timestamp gracefully
+        $this->assertIsInt($contents[0]->lastModified());
+    }
+
+    public function test_list_contents_handles_missing_optional_fields(): void
+    {
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'file1.txt',
+                        // Missing Size and LastModified
+                    ],
+                ],
+            ]);
+
+        $contents = iterator_to_array($this->adapter->listContents('', true));
+
+        $this->assertCount(1, $contents);
+        $this->assertInstanceOf(FileAttributes::class, $contents[0]);
+        $this->assertEquals('file1.txt', $contents[0]->path());
+        // Should provide sensible defaults for missing fields
+        $this->assertEquals(0, $contents[0]->fileSize());
+        $this->assertIsInt($contents[0]->lastModified());
     }
 }

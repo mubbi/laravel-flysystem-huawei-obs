@@ -306,4 +306,54 @@ class LaravelHuaweiObsAdapter implements FilesystemAdapter
     {
         return $this->adapter->allDirectories();
     }
+
+    /**
+     * Get all files in the bucket (recursive) with optimized performance
+     *
+     * @param  int  $maxKeys  Maximum number of keys to retrieve (0 for unlimited)
+     * @param  int  $timeout  Timeout in seconds for the operation
+     * @return array<string>
+     */
+    public function allFilesOptimized(int $maxKeys = 0, int $timeout = 60): array
+    {
+        return $this->adapter->allFilesOptimized($maxKeys, $timeout);
+    }
+
+    /**
+     * Get all directories in the bucket (recursive) with optimized performance
+     *
+     * @param  int  $maxKeys  Maximum number of keys to retrieve (0 for unlimited)
+     * @param  int  $timeout  Timeout in seconds for the operation
+     * @return array<string>
+     */
+    public function allDirectoriesOptimized(int $maxKeys = 0, int $timeout = 60): array
+    {
+        return $this->adapter->allDirectoriesOptimized($maxKeys, $timeout);
+    }
+
+    /**
+     * Get storage statistics with optimized performance
+     *
+     * @param  int  $maxFiles  Maximum number of files to process (0 for unlimited)
+     * @param  int  $timeout  Timeout in seconds for the operation
+     * @return array<string, mixed>
+     */
+    public function getStorageStats(int $maxFiles = 0, int $timeout = 60): array
+    {
+        return $this->adapter->getStorageStats($maxFiles, $timeout);
+    }
+
+    /**
+     * Optimized listContents with better timeout and pagination handling
+     *
+     * @param  string  $path  The path to list
+     * @param  bool  $deep  Whether to list recursively
+     * @param  int  $maxKeys  Maximum number of keys to retrieve (0 for unlimited)
+     * @param  int  $timeout  Timeout in seconds for the operation
+     * @return iterable<\League\Flysystem\FileAttributes|\League\Flysystem\DirectoryAttributes>
+     */
+    public function listContentsOptimized(string $path, bool $deep, int $maxKeys = 0, int $timeout = 60): iterable
+    {
+        return $this->adapter->listContentsOptimized($path, $deep, $maxKeys, $timeout);
+    }
 }
