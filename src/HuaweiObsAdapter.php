@@ -154,7 +154,8 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
                 'Key' => $key,
             ]);
 
-            return $result['Body'];
+            // Convert the CheckoutStream to string
+            return (string) $result['Body'];
         } catch (ObsException $e) {
             throw UnableToReadFile::fromLocation($path, $e->getMessage(), $e);
         } catch (\RuntimeException $e) {
