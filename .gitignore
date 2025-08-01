@@ -62,6 +62,7 @@ coverage/
 coverage.xml
 coverage.html
 *.coverage
+coverage.txt
 
 # Testing
 /tests/coverage/
