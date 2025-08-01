@@ -18,7 +18,7 @@ Thank you for your interest in contributing to the Laravel Flysystem Huawei OBS 
 
 ### Prerequisites
 
-- PHP 8.2 or higher
+- PHP 8.1 or higher
 - Composer
 - Git
 - A Huawei Cloud OBS account (for testing)
@@ -96,7 +96,7 @@ composer pint
 - Follow [PSR-12](https://www.php-fig.org/psr/psr-12/) coding standards
 - Use strict typing (`declare(strict_types=1);`)
 - Use type hints for all parameters and return types
-- Use PHP 8.2+ features where appropriate
+- Use PHP 8.1+ features where appropriate
 
 ### Laravel Standards
 
@@ -323,7 +323,7 @@ for better clarity. Update your config/filesystems.php accordingly.
 ```
 docs: update installation guide with new requirements
 
-- Add PHP 8.2+ requirement
+- Add PHP 8.1+ requirement
 - Update Laravel version compatibility
 - Add troubleshooting section
 ```
