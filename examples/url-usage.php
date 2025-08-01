@@ -72,15 +72,15 @@ echo "---------------------------------\n";
 try {
     // Using Laravel's temporaryUrl() method
     $temporaryUrl = Storage::disk('huawei-obs')->temporaryUrl('example-file.txt', now()->addHour());
-    echo "✓ Temporary URL (Laravel): ".substr($temporaryUrl, 0, 50)."...\n";
-    
+    echo '✓ Temporary URL (Laravel): '.substr($temporaryUrl, 0, 50)."...\n";
+
     // Using Laravel's temporaryUrl() with custom options
     $temporaryUrlWithOptions = Storage::disk('huawei-obs')->temporaryUrl(
-        'example-file.txt', 
-        now()->addHours(2), 
+        'example-file.txt',
+        now()->addHours(2),
         ['method' => 'PUT', 'headers' => ['Content-Type' => 'text/plain']]
     );
-    echo "✓ Temporary URL with Options: ".substr($temporaryUrlWithOptions, 0, 50)."...\n";
+    echo '✓ Temporary URL with Options: '.substr($temporaryUrlWithOptions, 0, 50)."...\n";
 } catch (\Exception $e) {
     echo "✗ Temporary URL Error: {$e->getMessage()}\n";
 }

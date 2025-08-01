@@ -482,6 +482,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
             if ($isPublic) {
                 // Construct the public URL
                 $endpoint = rtrim($this->client->getConfig()['endpoint'], '/');
+
                 return $endpoint.'/'.$this->bucket.'/'.$key;
             } else {
                 // For private objects, return a signed URL
@@ -505,9 +506,9 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
      *
      * This method is used by Laravel's FilesystemAdapter::temporaryUrl() method.
      *
-     * @param string $path The file path
-     * @param \DateTimeInterface $expiration The expiration time
-     * @param array $options Additional options
+     * @param  string  $path  The file path
+     * @param  \DateTimeInterface  $expiration  The expiration time
+     * @param  array{method?: string, headers?: array<string, string>}  $options  Additional options
      * @return string The temporary URL
      *
      * @throws \RuntimeException
@@ -520,10 +521,10 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
             $key = $this->getKey($path);
             $method = $options['method'] ?? 'GET';
             $headers = $options['headers'] ?? [];
-            
+
             // Calculate expiration time in seconds from now
             $expiresIn = $expiration->getTimestamp() - time();
-            
+
             // Ensure minimum and maximum expiration times
             $expiresIn = max(1, min($expiresIn, 604800)); // Between 1 second and 7 days
 
@@ -547,7 +548,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
      * This method is used by Laravel's FilesystemAdapter::url() method.
      * It's an alias for the url() method for compatibility.
      *
-     * @param string $path The file path
+     * @param  string  $path  The file path
      * @return string The URL
      *
      * @throws \RuntimeException
@@ -562,9 +563,9 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
      *
      * This method is used by Laravel's FilesystemAdapter for direct uploads.
      *
-     * @param string $path The file path
-     * @param \DateTimeInterface $expiration The expiration time
-     * @param array $options Additional options
+     * @param  string  $path  The file path
+     * @param  \DateTimeInterface  $expiration  The expiration time
+     * @param  array{method?: string, headers?: array<string, string>}  $options  Additional options
      * @return string The temporary upload URL
      *
      * @throws \RuntimeException
@@ -573,7 +574,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
     {
         // For upload URLs, we typically want PUT method
         $options['method'] = $options['method'] ?? 'PUT';
-        
+
         return $this->getTemporaryUrl($path, $expiration, $options);
     }
 
