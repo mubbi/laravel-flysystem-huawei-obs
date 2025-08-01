@@ -488,7 +488,6 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
                 // For private objects, return a signed URL
                 return $this->createSignedUrl($path, 'GET', 3600);
             }
-
         } catch (ObsException $e) {
             if ($e->getExceptionCode() === 'NoSuchResource') {
                 throw new \RuntimeException('File not found: '.$path);
@@ -613,6 +612,72 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
     }
 
     /**
+     * Get files in a directory (non-recursive)
+     *
+     * @param  string  $directory  The directory path
+     * @return array<string>
+     */
+    public function files(string $directory = ''): array
+    {
+        $files = [];
+        foreach ($this->listContents($directory, false) as $item) {
+            if ($item instanceof \League\Flysystem\FileAttributes) {
+                $files[] = $item->path();
+            }
+        }
+
+        return $files;
+    }
+
+    /**
+     * Get directories in a directory (non-recursive)
+     *
+     * @param  string  $directory  The directory path
+     * @return array<string>
+     */
+    public function directories(string $directory = ''): array
+    {
+        $directories = [];
+        foreach ($this->listContents($directory, false) as $item) {
+            if ($item instanceof \League\Flysystem\DirectoryAttributes) {
+                $directories[] = $item->path();
+            }
+        }
+
+        return $directories;
+    }
+
+    /**
+     * Check if a file exists (Laravel Storage facade compatibility)
+     *
+     * @param  string  $path  The file path
+     */
+    public function exists(string $path): bool
+    {
+        return $this->fileExists($path);
+    }
+
+    /**
+     * Get file size (Laravel Storage facade compatibility)
+     *
+     * @param  string  $path  The file path
+     */
+    public function size(string $path): int
+    {
+        try {
+            $key = $this->getKey($path);
+            $result = $this->client->getObjectMetadata([
+                'Bucket' => $this->bucket,
+                'Key' => $key,
+            ]);
+
+            return (int) ($result['ContentLength'] ?? 0);
+        } catch (ObsException $e) {
+            throw UnableToRetrieveMetadata::fileSize($path, $e->getMessage(), $e);
+        }
+    }
+
+    /**
      * Get the visibility of a file (Laravel Storage facade compatibility)
      */
     public function getVisibility(string $path): string
@@ -625,5 +690,25 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
         }
 
         return $visibility;
+    }
+
+    /**
+     * Get the mime type of a file (Laravel Storage facade compatibility)
+     */
+    public function getMimeType(string $path): string
+    {
+        $attributes = $this->mimeType($path);
+
+        return $attributes->mimeType() ?? 'application/octet-stream';
+    }
+
+    /**
+     * Get the last modified timestamp of a file (Laravel Storage facade compatibility)
+     */
+    public function getLastModified(string $path): int
+    {
+        $attributes = $this->lastModified($path);
+
+        return $attributes->lastModified() ?? time();
     }
 }

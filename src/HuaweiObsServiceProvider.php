@@ -57,7 +57,7 @@ class HuaweiObsServiceProvider extends ServiceProvider
                 throw new \InvalidArgumentException("Invalid endpoint URL for huawei-obs disk: {$config['endpoint']}");
             }
 
-            $adapter = new HuaweiObsAdapter(
+            $adapter = new LaravelHuaweiObsAdapter(
                 $config['key'],
                 $config['secret'],
                 $config['bucket'],
