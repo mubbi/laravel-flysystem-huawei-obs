@@ -61,10 +61,12 @@ This package includes robust security features:
 ## Requirements
 
 - PHP 8.1+
-- Laravel 9.0+ (supports Laravel 9, 10, 11, and 12)
+- Laravel 9.0+ (supports Laravel 9, 10.48.29+, 11, and 12)
 - Flysystem v3.0+ (primary) with v2.0+ compatibility
 - Guzzle v6.3.0+, v7.0+, or v8.0+ (automatic detection)
 - Huawei Cloud OBS account and credentials
+
+> **⚠️ Security Notice:** Laravel 10.0.0 to 10.48.28 contains a file validation bypass vulnerability (CVE-2025-27515). This package requires Laravel 10.48.29+ to ensure security. Please upgrade your Laravel installation if you're using an affected version.
 
 ## Installation
 
