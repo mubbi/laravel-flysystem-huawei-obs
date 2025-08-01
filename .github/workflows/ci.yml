@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -13,10 +16,10 @@ jobs:
     strategy:
       matrix:
         php: [8.1, 8.2, 8.3]
-        laravel: [9.*, 10.*, 11.*]
+        laravel: [9.0, 10.0, 11.0]
         exclude:
           - php: 8.3
-            laravel: 9.*
+            laravel: 9.0
 
     name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }}
 
@@ -29,7 +32,7 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: mbstring, pdo_sqlite, intl
 
-      - name: Install Laravel Testbench version
+      - name: Install Laravel Testbench
         run: |
           composer require "orchestra/testbench:^${{ matrix.laravel }}" --dev --no-interaction --no-update
 
@@ -38,6 +41,7 @@ jobs:
 
       - name: Run PHPUnit Tests
         run: vendor/bin/phpunit
+
 
   phpstan:
     name: PHPStan Analysis
@@ -51,7 +55,10 @@ jobs:
           extensions: mbstring, intl, pdo_sqlite
 
       - run: composer install --prefer-dist --no-interaction
-      - run: composer phpstan
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse
+
 
   pint:
     name: Laravel Pint
@@ -65,4 +72,6 @@ jobs:
           extensions: mbstring
 
       - run: composer install --prefer-dist --no-interaction
-      - run: composer pint-test
+
+      - name: Run Laravel Pint
+        run: vendor/bin/pint --test
