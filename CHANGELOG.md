@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1](https://github.com/mubbi/laravel-flysystem-huawei-obs/compare/v1.0.0...v1.0.1) (2025-08-01)
+
+
+### Bug Fixes
+
+* minimum laravel version requirement ([2e3a0b7](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/2e3a0b7140a7f3a9d3fb340ac26a90fbfb8d100e))
+* minimum laravel version requirement ([26799a7](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/26799a7b7fc050611069011cbc570d23d59d68b8))
+
 ## 1.0.0 (2025-07-31)
 
 
