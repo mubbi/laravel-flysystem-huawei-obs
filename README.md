@@ -45,8 +45,8 @@ This package includes robust security features:
 
 ## Requirements
 
-- PHP 8.2+
-- Laravel 11+
+- PHP 8.1+
+- Laravel 9.0+ (supports Laravel 9, 10, 11, and 12)
 - Huawei Cloud OBS account and credentials
 
 ## Installation

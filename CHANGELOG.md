@@ -72,8 +72,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Complete documentation with usage examples
 
 ### Technical Features
-- Laravel 11+ compatibility
-- PHP 8.2+ requirement
+- Laravel 9.0+ compatibility (supports Laravel 9, 10, 11, and 12)
+- PHP 8.1+ requirement
 - Uses official `obs/esdk-obs-php` SDK
 - Proper exception handling with Flysystem exceptions
 - Type-safe implementation with strict typing
