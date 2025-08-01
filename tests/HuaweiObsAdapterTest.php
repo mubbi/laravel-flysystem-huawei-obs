@@ -264,6 +264,25 @@ class HuaweiObsAdapterTest extends TestCase
         $this->adapter->read('test-file.txt');
     }
 
+    public function test_read_file_handles_checkout_stream_correctly(): void
+    {
+        // Create a mock CheckoutStream object
+        $mockStream = \Mockery::mock('Obs\Internal\Common\CheckoutStream');
+        $mockStream->shouldReceive('__toString')
+            ->andReturn('test content from stream');
+
+        $this->mockClient->shouldReceive('getObject')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+            ])
+            ->once()
+            ->andReturn(['Body' => $mockStream]);
+
+        $result = $this->adapter->read('test-file.txt');
+        $this->assertEquals('test content from stream', $result);
+    }
+
     public function test_read_stream_successfully(): void
     {
         $stream = fopen('php://temp', 'r+');
