@@ -6,7 +6,7 @@
 [![GitHub CI](https://img.shields.io/github/actions/workflow/status/mubbi/laravel-flysystem-huawei-obs/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/mubbi/laravel-flysystem-huawei-obs/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/mubbi/laravel-flysystem-huawei-obs.svg?style=flat-square)](https://github.com/mubbi/laravel-flysystem-huawei-obs/blob/main/LICENSE)
 [![PHP Version](https://img.shields.io/packagist/php-v/mubbi/laravel-flysystem-huawei-obs.svg?style=flat-square)](https://packagist.org/packages/mubbi/laravel-flysystem-huawei-obs)
-[![Laravel Version](https://img.shields.io/badge/Laravel-11%2B-red.svg?style=flat-square)](https://laravel.com)
+[![Laravel Version](https://img.shields.io/badge/Laravel-9%2B-red.svg?style=flat-square)](https://laravel.com)
 
 A Laravel Flysystem v3 adapter for Huawei Object Storage Service (OBS). This package provides seamless integration between Laravel's filesystem abstraction and Huawei Cloud OBS, allowing you to use Huawei OBS as a storage backend in your Laravel applications.
 
