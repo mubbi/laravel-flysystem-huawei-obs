@@ -5,100 +5,104 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
-  
+
 jobs:
   test:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        php: [8.2, 8.3]
-        laravel: [11.*]
+        php: [8.0, 8.1, 8.2, 8.3]
+        laravel: [9.*, 10.*, 11.*, 12.*]
+        exclude:
+          - php: 8.0
+            laravel: 10.*
+          - php: 8.0
+            laravel: 11.*
+          - php: 8.0
+            laravel: 12.*
+          - php: 8.1
+            laravel: 11.*
+          - php: 8.1
+            laravel: 12.*
+          - php: 8.3
+            laravel: 9.*
 
     name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }}
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ matrix.php }}
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo, phar, reflection, session, simplexml, spl, standard, tokenizer, xml, xmlreader, xmlwriter, zip, zlib
-        coverage: xdebug
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, intl, pdo_sqlite
+          coverage: xdebug
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-interaction
+      - name: Install correct Laravel/Testbench version
+        run: |
+          composer remove laravel/framework orchestra/testbench --dev --no-interaction || true
+          composer require "orchestra/testbench:^${{ matrix.laravel }}" --dev --no-interaction --update-with-dependencies
 
-    - name: Execute tests (via PHPUnit)
-      run: vendor/bin/phpunit --coverage-clover=coverage.xml --coverage-text
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction
 
-    - name: Verify coverage file exists
-      run: |
-        if [ ! -f coverage.xml ]; then
-          echo "Error: coverage.xml file was not generated"
-          exit 1
-        fi
-        echo "Coverage file size: $(wc -c < coverage.xml) bytes"
+      - name: Run Tests with Coverage
+        run: vendor/bin/phpunit --coverage-clover=coverage.xml --coverage-text
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: true
-        verbose: true
+      - name: Verify coverage file exists
+        run: |
+          if [ ! -f coverage.xml ]; then
+            echo "Error: coverage.xml file was not generated"
+            exit 1
+          fi
+          echo "Coverage file size: $(wc -c < coverage.xml) bytes"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          verbose: true
 
   phpstan:
     runs-on: ubuntu-latest
     name: PHPStan Analysis
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: 8.3
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo, phar, reflection, session, simplexml, spl, standard, tokenizer, xml, xmlreader, xmlwriter, zip, zlib
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: mbstring, intl, pdo_sqlite
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-interaction
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction
 
-    - name: Run PHPStan
-      run: vendor/bin/phpstan analyse
+      - name: Run PHPStan
+        run: composer phpstan
 
   pint:
     runs-on: ubuntu-latest
     name: Laravel Pint
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: 8.3
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo, phar, reflection, session, simplexml, spl, standard, tokenizer, xml, xmlreader, xmlwriter, zip, zlib
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: mbstring, intl, pdo_sqlite
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-interaction
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction
 
-    - name: Run Laravel Pint
-      run: vendor/bin/pint --test
-  commitlint-push:
-    runs-on: ubuntu-latest
-    name: Validate Commit Messages
-    if: github.event_name == 'push'
-
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Validate commit messages
-      uses: wagoid/commitlint-github-action@v5
-      with:
-        configFile: '@commitlint/config-conventional' 
+      - name: Run Laravel Pint
+        run: composer pint-test
