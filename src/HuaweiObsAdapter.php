@@ -443,4 +443,107 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
             throw UnableToCopyFile::fromLocationTo($source, $destination, $e);
         }
     }
+
+    /**
+     * Get the URL for the file at the given path.
+     *
+     *
+     * @throws \RuntimeException
+     */
+    public function url(string $path): string
+    {
+        try {
+            $this->checkAuthentication();
+
+            $key = $this->getKey($path);
+
+            // Check if the object is public
+            $result = $this->client->getObjectAcl([
+                'Bucket' => $this->bucket,
+                'Key' => $key,
+            ]);
+
+            $isPublic = false;
+            if (isset($result['Grants'])) {
+                foreach ($result['Grants'] as $grant) {
+                    if (isset($grant['Grantee']['URI']) &&
+                        $grant['Grantee']['URI'] === 'http://acs.amazonaws.com/groups/global/AllUsers') {
+                        if (isset($grant['Permission']) && in_array($grant['Permission'], ['READ', 'READ_ACP'])) {
+                            $isPublic = true;
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (! $isPublic) {
+                throw new \RuntimeException('This driver does not support retrieving URLs for private objects. Use createSignedUrl() for temporary access.');
+            }
+
+            // Construct the public URL
+            $endpoint = rtrim($this->client->getConfig()['endpoint'], '/');
+
+            return $endpoint.'/'.$this->bucket.'/'.$key;
+
+        } catch (ObsException $e) {
+            if ($e->getExceptionCode() === 'NoSuchResource') {
+                throw new \RuntimeException('File not found: '.$path);
+            }
+
+            throw new \RuntimeException('Unable to retrieve URL: '.$e->getMessage());
+        } catch (\RuntimeException $e) {
+            // Re-throw authentication errors
+            throw $e;
+        }
+    }
+
+    /**
+     * Get all files in the bucket (recursive)
+     *
+     * @return array<string>
+     */
+    public function allFiles(): array
+    {
+        $files = [];
+        foreach ($this->listContents('', true) as $item) {
+            if ($item instanceof \League\Flysystem\FileAttributes) {
+                $files[] = $item->path();
+            }
+        }
+
+        return $files;
+    }
+
+    /**
+     * Get all directories in the bucket (recursive)
+     *
+     * @return array<string>
+     */
+    public function allDirectories(): array
+    {
+        $directories = [];
+        foreach ($this->listContents('', true) as $item) {
+            if ($item instanceof \League\Flysystem\DirectoryAttributes) {
+                $directories[] = $item->path();
+            }
+        }
+
+        return $directories;
+    }
+
+    /**
+     * Get the visibility of a file (Laravel Storage facade compatibility)
+     */
+    public function getVisibility(string $path): string
+    {
+        $attributes = $this->visibility($path);
+        $visibility = $attributes->visibility();
+
+        if ($visibility === null) {
+            return 'private';
+        }
+
+        return $visibility;
+    }
 }
