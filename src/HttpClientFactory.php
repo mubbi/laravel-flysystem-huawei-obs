@@ -61,8 +61,17 @@ class HttpClientFactory
             if (isset($config['allow_redirects'])) {
                 $clientConfig['allow_redirects'] = $config['allow_redirects'];
             }
+        } elseif ($guzzleVersion === 'v7') {
+            // Guzzle v7 specific configurations
+            if (isset($config['http_errors'])) {
+                $clientConfig['http_errors'] = $config['http_errors'];
+            }
+
+            if (isset($config['allow_redirects'])) {
+                $clientConfig['allow_redirects'] = $config['allow_redirects'];
+            }
         } else {
-            // Guzzle v7+ specific configurations
+            // Guzzle v8+ specific configurations
             if (isset($config['http_errors'])) {
                 $clientConfig['http_errors'] = $config['http_errors'];
             }
@@ -87,6 +96,25 @@ class HttpClientFactory
             return 'v7'; // Default fallback
         }
 
+        // Try to get version from Composer's installed packages
+        if (class_exists('Composer\InstalledVersions')) {
+            try {
+                $version = \Composer\InstalledVersions::getVersion('guzzlehttp/guzzle');
+                if ($version !== null) {
+                    $majorVersion = (int) explode('.', $version)[0];
+                    if ($majorVersion === 6) {
+                        return 'v6';
+                    } elseif ($majorVersion === 7) {
+                        return 'v7';
+                    } elseif ($majorVersion === 8) {
+                        return 'v8';
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Fallback to reflection-based detection
+            }
+        }
+
         // Fallback: check class methods to determine version
         $reflection = new \ReflectionClass(Client::class);
 
@@ -97,6 +125,26 @@ class HttpClientFactory
 
         // Check for v7+ specific methods
         if ($reflection->hasMethod('getConfig')) {
+            // Try to distinguish between v7 and v8 by checking for v8-specific features
+            // Guzzle v8 has PSR-18 compliance and some additional methods
+            if (interface_exists('Psr\Http\Client\ClientInterface') &&
+                $reflection->implementsInterface('Psr\Http\Client\ClientInterface')) {
+                return 'v8';
+            }
+
+            // Check for v8-specific methods or properties
+            if ($reflection->hasMethod('sendRequest') &&
+                method_exists(Client::class, 'sendRequest')) {
+                // Additional check for v8-specific behavior
+                $sendRequestMethod = $reflection->getMethod('sendRequest');
+                $parameters = $sendRequestMethod->getParameters();
+                if (count($parameters) === 1 &&
+                    $parameters[0]->getType() &&
+                    $parameters[0]->getType()->getName() === 'Psr\Http\Message\RequestInterface') {
+                    return 'v8';
+                }
+            }
+
             return 'v7';
         }
 

@@ -73,7 +73,8 @@ This package includes robust security features:
 This package automatically detects and adapts to your installed versions of Guzzle:
 
 - **Guzzle v6**: Uses v6-specific client configurations
-- **Guzzle v7/v8**: Uses modern client configurations
+- **Guzzle v7**: Uses v7-specific client configurations
+- **Guzzle v8**: Uses v8-specific client configurations (with PSR-18 compliance)
 
 For Flysystem, the package uses v3 as the primary interface but maintains compatibility with v2 through dependency constraints. The package will automatically choose the correct HTTP client configuration based on your installed Guzzle version.
 
