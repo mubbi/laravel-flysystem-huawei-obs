@@ -350,7 +350,18 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
             $key = rtrim($key, '/').'/';
 
             $marker = null;
+            $processedKeys = [];
+            $maxIterations = 100; // Safety limit to prevent infinite loops
+            $iterationCount = 0;
+
             do {
+                $iterationCount++;
+
+                // Safety check to prevent infinite loops
+                if ($iterationCount > $maxIterations) {
+                    throw new \RuntimeException('Maximum iterations reached. Possible infinite loop detected.');
+                }
+
                 $options = [
                     'Bucket' => $this->bucket,
                     'Prefix' => $key,
@@ -374,13 +385,19 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
                             continue;
                         }
 
+                        // Check if we've already processed this key to prevent duplicates
+                        if (in_array($objectKey, $processedKeys)) {
+                            continue;
+                        }
+
+                        $processedKeys[] = $objectKey;
                         $relativePath = $this->getRelativePath($objectKey);
 
                         yield new FileAttributes(
                             $relativePath,
                             (int) $object['Size'],
                             $this->aclToVisibility($object['Grants'] ?? []),
-                            (int) strtotime($object['LastModified'])
+                            $object['LastModified'] ? (int) strtotime($object['LastModified']) : time()
                         );
                     }
                 }
@@ -389,13 +406,29 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
                 if (! empty($result['CommonPrefixes'])) {
                     foreach ($result['CommonPrefixes'] as $prefix) {
                         $prefixKey = $prefix['Prefix'];
+
+                        // Check if we've already processed this prefix to prevent duplicates
+                        if (in_array($prefixKey, $processedKeys)) {
+                            continue;
+                        }
+
+                        $processedKeys[] = $prefixKey;
                         $relativePath = $this->getRelativePath(rtrim($prefixKey, '/'));
 
                         yield new DirectoryAttributes($relativePath);
                     }
                 }
 
-                $marker = $result['NextMarker'] ?? null;
+                // Get the next marker, but ensure it's different from the current one
+                $nextMarker = $result['NextMarker'] ?? null;
+
+                // Safety check: if the next marker is the same as current, break to prevent infinite loop
+                if ($nextMarker === $marker || $nextMarker === null) {
+                    break;
+                }
+
+                $marker = $nextMarker;
+
             } while ($marker !== null);
         } catch (ObsException $e) {
             throw new \RuntimeException('Unable to list contents: '.$e->getMessage(), 0, $e);
@@ -645,6 +678,237 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
         }
 
         return $directories;
+    }
+
+    /**
+     * Get all files in the bucket (recursive) with optimized performance
+     *
+     * @param  int  $maxKeys  Maximum number of keys to retrieve (0 for unlimited)
+     * @param  int  $timeout  Timeout in seconds for the operation
+     * @return array<string>
+     */
+    public function allFilesOptimized(int $maxKeys = 0, int $timeout = 60): array
+    {
+        $files = [];
+        $processedKeys = 0;
+        $startTime = time();
+
+        foreach ($this->listContentsOptimized('', true, $maxKeys, $timeout) as $item) {
+            if ($item instanceof \League\Flysystem\FileAttributes) {
+                $files[] = $item->path();
+                $processedKeys++;
+
+                // Check timeout
+                if ($timeout > 0 && (time() - $startTime) >= $timeout) {
+                    break;
+                }
+            }
+        }
+
+        return $files;
+    }
+
+    /**
+     * Get all directories in the bucket (recursive) with optimized performance
+     *
+     * @param  int  $maxKeys  Maximum number of keys to retrieve (0 for unlimited)
+     * @param  int  $timeout  Timeout in seconds for the operation
+     * @return array<string>
+     */
+    public function allDirectoriesOptimized(int $maxKeys = 0, int $timeout = 60): array
+    {
+        $directories = [];
+        $processedKeys = 0;
+        $startTime = time();
+
+        foreach ($this->listContentsOptimized('', true, $maxKeys, $timeout) as $item) {
+            if ($item instanceof \League\Flysystem\DirectoryAttributes) {
+                $directories[] = $item->path();
+                $processedKeys++;
+
+                // Check timeout
+                if ($timeout > 0 && (time() - $startTime) >= $timeout) {
+                    break;
+                }
+            }
+        }
+
+        return $directories;
+    }
+
+    /**
+     * Optimized listContents with better timeout and pagination handling
+     *
+     * @param  string  $path  The path to list
+     * @param  bool  $deep  Whether to list recursively
+     * @param  int  $maxKeys  Maximum number of keys to retrieve (0 for unlimited)
+     * @param  int  $timeout  Timeout in seconds for the operation
+     * @return iterable<\League\Flysystem\FileAttributes|\League\Flysystem\DirectoryAttributes>
+     */
+    public function listContentsOptimized(string $path, bool $deep, int $maxKeys = 0, int $timeout = 60): iterable
+    {
+        try {
+            $this->checkAuthentication();
+
+            $key = $this->getKey($path);
+            $key = rtrim($key, '/').'/';
+
+            $marker = null;
+            $processedKeys = [];
+            $processedCount = 0;
+            $startTime = time();
+            $maxIterations = 100; // Safety limit to prevent infinite loops
+            $iterationCount = 0;
+
+            do {
+                $iterationCount++;
+
+                // Check timeout before making API call
+                if ($timeout > 0 && (time() - $startTime) >= $timeout) {
+                    break;
+                }
+
+                // Safety check to prevent infinite loops
+                if ($iterationCount > $maxIterations) {
+                    throw new \RuntimeException('Maximum iterations reached. Possible infinite loop detected.');
+                }
+
+                $options = [
+                    'Bucket' => $this->bucket,
+                    'Prefix' => $key,
+                    'Delimiter' => $deep ? null : '/',
+                    'MaxKeys' => min(1000, $maxKeys > 0 ? $maxKeys - $processedCount : 1000),
+                ];
+
+                if ($marker !== null) {
+                    $options['Marker'] = $marker;
+                }
+
+                $result = $this->client->listObjects($options);
+
+                // Handle files
+                if (! empty($result['Contents'])) {
+                    foreach ($result['Contents'] as $object) {
+                        $objectKey = $object['Key'];
+
+                        // Skip the directory marker itself
+                        if ($objectKey === $key) {
+                            continue;
+                        }
+
+                        // Check if we've already processed this key to prevent duplicates
+                        if (in_array($objectKey, $processedKeys)) {
+                            continue;
+                        }
+
+                        $processedKeys[] = $objectKey;
+                        $relativePath = $this->getRelativePath($objectKey);
+
+                        yield new FileAttributes(
+                            $relativePath,
+                            $object['Size'] ?? 0,
+                            $this->aclToVisibility($object['Grants'] ?? []),
+                            $object['LastModified'] ? (int) strtotime($object['LastModified']) : time()
+                        );
+
+                        $processedCount++;
+
+                        // Check if we've reached the maximum keys limit
+                        if ($maxKeys > 0 && $processedCount >= $maxKeys) {
+                            return;
+                        }
+                    }
+                }
+
+                // Handle directories (CommonPrefixes)
+                if (! empty($result['CommonPrefixes'])) {
+                    foreach ($result['CommonPrefixes'] as $prefix) {
+                        $prefixKey = $prefix['Prefix'];
+
+                        // Check if we've already processed this prefix to prevent duplicates
+                        if (in_array($prefixKey, $processedKeys)) {
+                            continue;
+                        }
+
+                        $processedKeys[] = $prefixKey;
+                        $relativePath = $this->getRelativePath(rtrim($prefixKey, '/'));
+
+                        yield new DirectoryAttributes($relativePath);
+
+                        $processedCount++;
+
+                        // Check if we've reached the maximum keys limit
+                        if ($maxKeys > 0 && $processedCount >= $maxKeys) {
+                            return;
+                        }
+                    }
+                }
+
+                // Get the next marker, but ensure it's different from the current one
+                $nextMarker = $result['NextMarker'] ?? null;
+
+                // Safety check: if the next marker is the same as current, break to prevent infinite loop
+                if ($nextMarker === $marker || $nextMarker === null) {
+                    break;
+                }
+
+                $marker = $nextMarker;
+
+            } while ($marker !== null);
+        } catch (ObsException $e) {
+            throw new \RuntimeException('Unable to list contents: '.$e->getMessage(), 0, $e);
+        } catch (\RuntimeException $e) {
+            // Re-throw authentication errors
+            throw $e;
+        }
+    }
+
+    /**
+     * Get storage statistics with optimized performance
+     *
+     * @param  int  $maxFiles  Maximum number of files to process (0 for unlimited)
+     * @param  int  $timeout  Timeout in seconds for the operation
+     * @return array<string, mixed>
+     */
+    public function getStorageStats(int $maxFiles = 0, int $timeout = 60): array
+    {
+        $totalSize = 0;
+        $fileTypes = [];
+        $fileCount = 0;
+        $directoryCount = 0;
+        $processedCount = 0;
+        $startTime = time();
+
+        foreach ($this->listContentsOptimized('', true, $maxFiles, $timeout) as $item) {
+            if ($item instanceof \League\Flysystem\FileAttributes) {
+                $fileCount++;
+                $size = $item->fileSize() ?? 0;
+                $totalSize += $size;
+
+                $extension = pathinfo($item->path(), PATHINFO_EXTENSION);
+                $fileTypes[$extension] = ($fileTypes[$extension] ?? 0) + 1;
+            } elseif ($item instanceof \League\Flysystem\DirectoryAttributes) {
+                $directoryCount++;
+            }
+
+            $processedCount++;
+
+            // Check timeout
+            if ($timeout > 0 && (time() - $startTime) >= $timeout) {
+                break;
+            }
+        }
+
+        return [
+            'total_files' => $fileCount,
+            'total_directories' => $directoryCount,
+            'total_size_bytes' => $totalSize,
+            'total_size_mb' => round($totalSize / 1024 / 1024, 2),
+            'file_types' => $fileTypes,
+            'processed_count' => $processedCount,
+            'processing_time_seconds' => time() - $startTime,
+            'has_more_files' => $maxFiles > 0 && $processedCount >= $maxFiles,
+        ];
     }
 
     /**
