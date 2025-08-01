@@ -73,6 +73,7 @@ coverage.html
 .php-cs-fixer.php
 .phpstan.neon.dist
 .phpstan.result.cache
+.phpstan
 .phpstan/resultCache.php
 
 # =============================================================================
@@ -326,3 +327,4 @@ docker-compose.override.yml
 !.github/SECURITY.md
 !.github/ISSUE_TEMPLATE/
 !.github/pull_request_template.md 
+.phpstan/resultCache.php
