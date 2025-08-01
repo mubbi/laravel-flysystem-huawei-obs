@@ -247,6 +247,68 @@ Enable operation and error logging:
 ],
 ```
 
+### Laravel Storage Facade Compatibility
+
+This package provides full compatibility with Laravel's Storage facade. All the standard Laravel Storage methods are supported:
+
+#### Directory Listing
+```php
+// List files in a directory (non-recursive)
+$files = Storage::disk('huawei-obs')->files('uploads');
+
+// List directories in a directory (non-recursive)
+$directories = Storage::disk('huawei-obs')->directories('uploads');
+
+// List all files and directories (recursive)
+$allFiles = Storage::disk('huawei-obs')->allFiles();
+$allDirectories = Storage::disk('huawei-obs')->allDirectories();
+```
+
+#### File Information
+```php
+// Check if file exists
+$exists = Storage::disk('huawei-obs')->exists('file.txt');
+
+// Get file size
+$size = Storage::disk('huawei-obs')->size('file.txt');
+
+// Get last modified timestamp
+$modified = Storage::disk('huawei-obs')->lastModified('file.txt');
+
+// Get MIME type
+$mimeType = Storage::disk('huawei-obs')->mimeType('file.txt');
+
+// Get file visibility
+$visibility = Storage::disk('huawei-obs')->visibility('file.txt');
+```
+
+#### Complete Example
+```php
+$directory = $request->get('directory', '');
+$files = Storage::disk('huawei-obs')->files($directory);
+$directories = Storage::disk('huawei-obs')->directories($directory);
+
+$fileDetails = [];
+foreach ($files as $file) {
+    $fileDetails[] = [
+        'name' => $file,
+        'size' => Storage::disk('huawei-obs')->size($file),
+        'last_modified' => Storage::disk('huawei-obs')->lastModified($file),
+        'mime_type' => Storage::disk('huawei-obs')->mimeType($file),
+        'url' => Storage::disk('huawei-obs')->url($file),
+        'visibility' => Storage::disk('huawei-obs')->visibility($file)
+    ];
+}
+
+return response()->json([
+    'success' => true,
+    'files' => $fileDetails,
+    'directories' => $directories,
+    'total_files' => count($files),
+    'total_directories' => count($directories)
+]);
+```
+
 Logged information includes:
 - Operation name and duration
 - File path and bucket
