@@ -28,6 +28,7 @@ This package now supports multiple versions of both Flysystem and Guzzle:
 - ✅ **Huawei OBS SDK Integration**: Uses the official `obs/esdk-obs-php` SDK
 - ✅ **Temporary Credentials**: Support for session tokens (`securityToken`)
 - ✅ **Signed URLs**: Generate pre-signed URLs for temporary object access
+- ✅ **Public URLs**: Generate public URLs for objects with public read access
 - ✅ **Post Signatures**: Create signatures for direct browser uploads to OBS
 - ✅ **Object Tagging**: Add and manage metadata tags on OBS objects
 - ✅ **Object Restoration**: Restore archived objects from OBS
@@ -154,8 +155,12 @@ Storage::disk('huawei-obs')->copy('source.txt', 'destination.txt');
 // Move a file
 Storage::disk('huawei-obs')->move('old.txt', 'new.txt');
 
-// Get file URL
+// Get file URL (only for public objects)
 $url = Storage::disk('huawei-obs')->url('file.txt');
+
+// For private objects, use signed URLs instead
+$adapter = Storage::disk('huawei-obs')->getAdapter();
+$signedUrl = $adapter->createSignedUrl('private-file.txt', 'GET', 3600);
 ```
 
 ### Directory Operations
@@ -167,6 +172,10 @@ Storage::disk('huawei-obs')->makeDirectory('uploads');
 // List directory contents
 $files = Storage::disk('huawei-obs')->files('uploads');
 $directories = Storage::disk('huawei-obs')->directories('uploads');
+
+// List all files and directories (recursive)
+$allFiles = Storage::disk('huawei-obs')->allFiles();
+$allDirectories = Storage::disk('huawei-obs')->allDirectories();
 
 // Delete a directory and all its contents
 Storage::disk('huawei-obs')->deleteDirectory('uploads');
@@ -189,6 +198,9 @@ Storage::disk('huawei-obs')->setVisibility('file.txt', 'public');
 
 // Get file visibility
 $visibility = Storage::disk('huawei-obs')->visibility('file.txt');
+
+// Alternative method for getting visibility
+$visibility = Storage::disk('huawei-obs')->getVisibility('file.txt');
 ```
 
 ## Advanced Features
@@ -307,9 +319,30 @@ $adapter = new \LaravelFlysystemHuaweiObs\HuaweiObsAdapter(
 $adapter->refreshCredentials('new_access_key', 'new_secret_key', 'new_security_token');
 ```
 
-### Signed URLs
+### URL Handling
 
-Create temporary URLs for direct access to objects:
+The adapter supports both public URLs and signed URLs:
+
+#### Public URLs
+
+For objects with public read access, you can generate direct URLs:
+
+```php
+// Get public URL (only works for public objects)
+$url = Storage::disk('huawei-obs')->url('public-file.txt');
+
+// For private objects, this will throw an exception
+try {
+    $url = Storage::disk('huawei-obs')->url('private-file.txt');
+} catch (\RuntimeException $e) {
+    // Handle private object error
+    echo $e->getMessage(); // "This driver does not support retrieving URLs for private objects. Use createSignedUrl() for temporary access."
+}
+```
+
+#### Signed URLs
+
+Create temporary URLs for direct access to objects (works for both public and private objects):
 
 ```php
 $adapter = Storage::disk('huawei-obs')->getAdapter();

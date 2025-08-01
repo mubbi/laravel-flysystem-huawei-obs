@@ -646,6 +646,206 @@ class HuaweiObsAdapterTest extends TestCase
         $this->assertEquals('https://signed-url.example.com', $signedUrl);
     }
 
+    public function test_url_returns_public_url_for_public_object(): void
+    {
+        $this->mockClient->shouldReceive('getObjectAcl')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+            ])
+            ->once()
+            ->andReturn([
+                'Grants' => [
+                    [
+                        'Grantee' => [
+                            'URI' => 'http://acs.amazonaws.com/groups/global/AllUsers',
+                        ],
+                        'Permission' => 'READ',
+                    ],
+                ],
+            ]);
+
+        $this->mockClient->shouldReceive('getConfig')
+            ->once()
+            ->andReturn(['endpoint' => 'https://obs.cn-north-1.myhuaweicloud.com']);
+
+        $url = $this->adapter->url('test-file.txt');
+        $this->assertEquals('https://obs.cn-north-1.myhuaweicloud.com/test-bucket/test-file.txt', $url);
+    }
+
+    public function test_url_throws_exception_for_private_object(): void
+    {
+        $this->mockClient->shouldReceive('getObjectAcl')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+            ])
+            ->once()
+            ->andReturn([
+                'Grants' => [
+                    [
+                        'Grantee' => [
+                            'ID' => 'test-user-id',
+                        ],
+                        'Permission' => 'READ',
+                    ],
+                ],
+            ]);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('This driver does not support retrieving URLs for private objects. Use createSignedUrl() for temporary access.');
+
+        $this->adapter->url('test-file.txt');
+    }
+
+    public function test_url_throws_exception_for_nonexistent_file(): void
+    {
+        $this->mockClient->shouldReceive('getObjectAcl')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'nonexistent-file.txt',
+            ])
+            ->once()
+            ->andThrow(new \Obs\ObsException('NoSuchResource'));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Unable to retrieve URL: NoSuchResource');
+
+        $this->adapter->url('nonexistent-file.txt');
+    }
+
+    public function test_url_with_prefix(): void
+    {
+        $adapter = new HuaweiObsAdapter(
+            'test-key',
+            'test-secret',
+            'test-bucket',
+            'https://obs.cn-north-1.myhuaweicloud.com',
+            'uploads'
+        );
+
+        $this->mockClient = \Mockery::mock(\Obs\ObsClient::class);
+        $adapterReflection = new \ReflectionClass($adapter);
+        $clientProperty = $adapterReflection->getProperty('client');
+        $clientProperty->setAccessible(true);
+        $clientProperty->setValue($adapter, $this->mockClient);
+
+        // Mock authentication check
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => 'test-bucket'])
+            ->once()
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $this->mockClient->shouldReceive('getObjectAcl')
+            ->with([
+                'Bucket' => 'test-bucket',
+                'Key' => 'uploads/test-file.txt',
+            ])
+            ->once()
+            ->andReturn([
+                'Grants' => [
+                    [
+                        'Grantee' => [
+                            'URI' => 'http://acs.amazonaws.com/groups/global/AllUsers',
+                        ],
+                        'Permission' => 'READ',
+                    ],
+                ],
+            ]);
+
+        $this->mockClient->shouldReceive('getConfig')
+            ->once()
+            ->andReturn(['endpoint' => 'https://obs.cn-north-1.myhuaweicloud.com']);
+
+        $url = $adapter->url('test-file.txt');
+        $this->assertEquals('https://obs.cn-north-1.myhuaweicloud.com/test-bucket/uploads/test-file.txt', $url);
+    }
+
+    public function test_all_files(): void
+    {
+        // Mock authentication check
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->once()
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'file1.txt',
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ],
+                    [
+                        'Key' => 'folder/file2.txt',
+                        'Size' => 200,
+                        'LastModified' => '2023-01-02T00:00:00Z',
+                    ],
+                ],
+            ]);
+
+        $files = $this->adapter->allFiles();
+        $this->assertEquals(['file1.txt', 'folder/file2.txt'], $files);
+    }
+
+    public function test_all_directories(): void
+    {
+        // Mock authentication check
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->once()
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => '/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'CommonPrefixes' => [
+                    ['Prefix' => 'folder1/'],
+                    ['Prefix' => 'folder2/'],
+                ],
+            ]);
+
+        $directories = $this->adapter->allDirectories();
+        $this->assertEquals(['folder1', 'folder2'], $directories);
+    }
+
+    public function test_get_visibility(): void
+    {
+        $this->mockClient->shouldReceive('getObjectAcl')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+            ])
+            ->once()
+            ->andReturn([
+                'Grants' => [
+                    [
+                        'Grantee' => [
+                            'URI' => 'http://acs.amazonaws.com/groups/global/AllUsers',
+                        ],
+                        'Permission' => 'READ',
+                    ],
+                ],
+            ]);
+
+        $visibility = $this->adapter->getVisibility('test-file.txt');
+        $this->assertEquals('public', $visibility);
+    }
+
     public function test_create_post_signature(): void
     {
         $this->mockClient->shouldReceive('createPostSignature')
