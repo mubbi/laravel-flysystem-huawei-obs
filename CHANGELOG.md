@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.6](https://github.com/mubbi/laravel-flysystem-huawei-obs/compare/v1.2.5...v1.2.6) (2025-08-01)
+
+
+### Bug Fixes
+
+* guzzle versions handling ([c82c454](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/c82c454ae4f6174f2c82f0eff6212ac1ea753c49))
+* guzzle versions handling ([e9fb355](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/e9fb355b03ee80116bccc287997ad1368d5c7280))
+* lint and phpstan issues ([9049af1](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/9049af162d53bcc49ad272a38a450abd641c84b9))
+
 ## [1.2.5](https://github.com/mubbi/laravel-flysystem-huawei-obs/compare/v1.2.4...v1.2.5) (2025-08-01)
 
 
