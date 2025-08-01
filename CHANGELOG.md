@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0](https://github.com/mubbi/laravel-flysystem-huawei-obs/compare/v1.0.1...v1.1.0) (2025-08-01)
+
+
+### Features
+
+* minimum requirements update ([f4bfc92](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/f4bfc92e71d87ac88c84497a71e67fbdcfa92352))
+* minimum requirements update ([27a6986](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/27a698672460039a864505501962f3d5a82ec190))
+
+
+### Bug Fixes
+
+* ci for different versions ([4cdcf5f](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/4cdcf5fd1b61e60ebb70a2aa9bc69a70a076d8a3))
+* ci pipeline ([4bb5fa0](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/4bb5fa0df93af6a3ec82255b147846354e31cd66))
+* ci pipelines ([f81708c](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/f81708cae3e801c9d9ef39a3ccd8e74ec29ad772))
+* ci pipelines ([afdec5a](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/afdec5a320fbf396579dce6c00ee4d7b96f08df1))
+* versions support and ci ([e87c96d](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/e87c96dd4b0c9e2c9f911844d2588d8c9e5731a5))
+
 ## [1.0.1](https://github.com/mubbi/laravel-flysystem-huawei-obs/compare/v1.0.0...v1.0.1) (2025-08-01)
 
 
