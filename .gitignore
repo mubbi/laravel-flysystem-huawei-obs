@@ -62,6 +62,7 @@ coverage/
 coverage.xml
 coverage.html
 *.coverage
+coverage.txt
 
 # Testing
 /tests/coverage/
@@ -73,6 +74,7 @@ coverage.html
 .php-cs-fixer.php
 .phpstan.neon.dist
 .phpstan.result.cache
+.phpstan
 .phpstan/resultCache.php
 
 # =============================================================================
@@ -326,3 +328,4 @@ docker-compose.override.yml
 !.github/SECURITY.md
 !.github/ISSUE_TEMPLATE/
 !.github/pull_request_template.md 
+.phpstan/resultCache.php

@@ -942,7 +942,7 @@ class HuaweiObsAdapter implements FilesystemAdapter
     {
         foreach ($grants as $grant) {
             if (isset($grant['Grantee']['URI']) && $grant['Grantee']['URI'] === 'http://acs.amazonaws.com/groups/global/AllUsers') {
-                if (in_array($grant['Permission'], ['READ', 'READ_ACP'])) {
+                if (isset($grant['Permission']) && in_array($grant['Permission'], ['READ', 'READ_ACP'])) {
                     return Visibility::PUBLIC;
                 }
             }

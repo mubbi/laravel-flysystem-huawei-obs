@@ -195,6 +195,398 @@ class TestHuaweiObsCommandTest extends TestCase
         }
     }
 
+    public function test_test_authentication_success(): void
+    {
+        $command = $this->getMockBuilder(TestHuaweiObsCommand::class)
+            ->onlyMethods(['info', 'error'])
+            ->getMock();
+
+        $mockAdapter = Mockery::mock(HuaweiObsAdapter::class);
+        $mockAdapter->shouldReceive('refreshAuthentication')
+            ->once()
+            ->andReturn(true);
+
+        $command->expects($this->exactly(2))
+            ->method('info');
+
+        $command->expects($this->never())
+            ->method('error');
+
+        // Use reflection to access the private testAuthentication method
+        $reflection = new \ReflectionClass($command);
+        $testAuthMethod = $reflection->getMethod('testAuthentication');
+        $testAuthMethod->setAccessible(true);
+
+        $testAuthMethod->invoke($command, $mockAdapter);
+    }
+
+    public function test_test_authentication_failure(): void
+    {
+        $command = $this->getMockBuilder(TestHuaweiObsCommand::class)
+            ->onlyMethods(['info', 'error'])
+            ->getMock();
+
+        $mockAdapter = Mockery::mock(HuaweiObsAdapter::class);
+        $mockAdapter->shouldReceive('refreshAuthentication')
+            ->once()
+            ->andThrow(new \Exception('Auth failed'));
+
+        $command->expects($this->once())
+            ->method('info');
+
+        $command->expects($this->once())
+            ->method('error');
+
+        // Use reflection to access the private testAuthentication method
+        $reflection = new \ReflectionClass($command);
+        $testAuthMethod = $reflection->getMethod('testAuthentication');
+        $testAuthMethod->setAccessible(true);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Auth failed');
+
+        $testAuthMethod->invoke($command, $mockAdapter);
+    }
+
+    public function test_test_write_operations_success(): void
+    {
+        $command = $this->getMockBuilder(TestHuaweiObsCommand::class)
+            ->onlyMethods(['info', 'error'])
+            ->getMock();
+
+        $mockDisk = Mockery::mock(Filesystem::class);
+        $mockAdapter = Mockery::mock(HuaweiObsAdapter::class);
+
+        $mockDisk->shouldReceive('put')
+            ->once()
+            ->andReturn(true);
+
+        $mockAdapter->shouldReceive('createSignedUrl')
+            ->once()
+            ->andReturn('https://example.com/signed-url');
+
+        $mockAdapter->shouldReceive('createPostSignature')
+            ->once()
+            ->andReturn(['signature' => 'test-signature']);
+
+        $mockAdapter->shouldReceive('setObjectTags')
+            ->once()
+            ->andReturn(true);
+
+        $command->expects($this->exactly(6))
+            ->method('info');
+
+        $command->expects($this->never())
+            ->method('error');
+
+        // Use reflection to access the private testWriteOperations method
+        $reflection = new \ReflectionClass($command);
+        $testWriteMethod = $reflection->getMethod('testWriteOperations');
+        $testWriteMethod->setAccessible(true);
+
+        $testWriteMethod->invoke($command, $mockDisk, $mockAdapter);
+    }
+
+    public function test_test_write_operations_failure(): void
+    {
+        $command = $this->getMockBuilder(TestHuaweiObsCommand::class)
+            ->onlyMethods(['info', 'error'])
+            ->getMock();
+
+        $mockDisk = Mockery::mock(Filesystem::class);
+        $mockAdapter = Mockery::mock(HuaweiObsAdapter::class);
+
+        $mockDisk->shouldReceive('put')
+            ->once()
+            ->andThrow(new \Exception('Write failed'));
+
+        $command->expects($this->once())
+            ->method('info');
+
+        $command->expects($this->once())
+            ->method('error');
+
+        // Use reflection to access the private testWriteOperations method
+        $reflection = new \ReflectionClass($command);
+        $testWriteMethod = $reflection->getMethod('testWriteOperations');
+        $testWriteMethod->setAccessible(true);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Write failed');
+
+        $testWriteMethod->invoke($command, $mockDisk, $mockAdapter);
+    }
+
+    public function test_test_read_operations_success(): void
+    {
+        $command = $this->getMockBuilder(TestHuaweiObsCommand::class)
+            ->onlyMethods(['info', 'error'])
+            ->getMock();
+
+        $mockDisk = Mockery::mock(Filesystem::class);
+        $mockAdapter = Mockery::mock(HuaweiObsAdapter::class);
+
+        $testContent = 'Test content for reading';
+
+        $mockDisk->shouldReceive('put')
+            ->once()
+            ->andReturn(true);
+
+        $mockDisk->shouldReceive('get')
+            ->once()
+            ->andReturn($testContent);
+
+        $mockDisk->shouldReceive('exists')
+            ->once()
+            ->andReturn(true);
+
+        $mockDisk->shouldReceive('size')
+            ->once()
+            ->andReturn(strlen($testContent));
+
+        $mockAdapter->shouldReceive('getObjectTags')
+            ->once()
+            ->andReturn(['test' => 'value']);
+
+        $command->expects($this->exactly(6))
+            ->method('info');
+
+        $command->expects($this->never())
+            ->method('error');
+
+        // Use reflection to access the private testReadOperations method
+        $reflection = new \ReflectionClass($command);
+        $testReadMethod = $reflection->getMethod('testReadOperations');
+        $testReadMethod->setAccessible(true);
+
+        $testReadMethod->invoke($command, $mockDisk, $mockAdapter);
+    }
+
+    public function test_test_read_operations_content_mismatch(): void
+    {
+        $command = $this->getMockBuilder(TestHuaweiObsCommand::class)
+            ->onlyMethods(['info', 'error'])
+            ->getMock();
+
+        $mockDisk = Mockery::mock(Filesystem::class);
+        $mockAdapter = Mockery::mock(HuaweiObsAdapter::class);
+
+        $mockDisk->shouldReceive('put')
+            ->once()
+            ->andReturn(true);
+
+        $mockDisk->shouldReceive('get')
+            ->once()
+            ->andReturn('Different content');
+
+        $command->expects($this->once())
+            ->method('info');
+
+        $command->expects($this->once())
+            ->method('error');
+
+        // Use reflection to access the private testReadOperations method
+        $reflection = new \ReflectionClass($command);
+        $testReadMethod = $reflection->getMethod('testReadOperations');
+        $testReadMethod->setAccessible(true);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Content mismatch');
+
+        $testReadMethod->invoke($command, $mockDisk, $mockAdapter);
+    }
+
+    public function test_test_read_operations_existence_failure(): void
+    {
+        $command = $this->getMockBuilder(TestHuaweiObsCommand::class)
+            ->onlyMethods(['info', 'error'])
+            ->getMock();
+
+        $mockDisk = Mockery::mock(Filesystem::class);
+        $mockAdapter = Mockery::mock(HuaweiObsAdapter::class);
+
+        $testContent = 'Test content for reading';
+
+        $mockDisk->shouldReceive('put')
+            ->once()
+            ->andReturn(true);
+
+        $mockDisk->shouldReceive('get')
+            ->once()
+            ->andReturn($testContent);
+
+        $mockDisk->shouldReceive('exists')
+            ->once()
+            ->andReturn(false);
+
+        $command->expects($this->exactly(2))
+            ->method('info');
+
+        $command->expects($this->once())
+            ->method('error');
+
+        // Use reflection to access the private testReadOperations method
+        $reflection = new \ReflectionClass($command);
+        $testReadMethod = $reflection->getMethod('testReadOperations');
+        $testReadMethod->setAccessible(true);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('File existence check failed');
+
+        $testReadMethod->invoke($command, $mockDisk, $mockAdapter);
+    }
+
+    public function test_test_read_operations_size_failure(): void
+    {
+        $command = $this->getMockBuilder(TestHuaweiObsCommand::class)
+            ->onlyMethods(['info', 'error'])
+            ->getMock();
+
+        $mockDisk = Mockery::mock(Filesystem::class);
+        $mockAdapter = Mockery::mock(HuaweiObsAdapter::class);
+
+        $testContent = 'Test content for reading';
+
+        $mockDisk->shouldReceive('put')
+            ->once()
+            ->andReturn(true);
+
+        $mockDisk->shouldReceive('get')
+            ->once()
+            ->andReturn($testContent);
+
+        $mockDisk->shouldReceive('exists')
+            ->once()
+            ->andReturn(true);
+
+        $mockDisk->shouldReceive('size')
+            ->once()
+            ->andReturn(999); // Wrong size
+
+        $command->expects($this->exactly(3))
+            ->method('info');
+
+        $command->expects($this->once())
+            ->method('error');
+
+        // Use reflection to access the private testReadOperations method
+        $reflection = new \ReflectionClass($command);
+        $testReadMethod = $reflection->getMethod('testReadOperations');
+        $testReadMethod->setAccessible(true);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('File size check failed');
+
+        $testReadMethod->invoke($command, $mockDisk, $mockAdapter);
+    }
+
+    public function test_test_delete_operations_success(): void
+    {
+        $command = $this->getMockBuilder(TestHuaweiObsCommand::class)
+            ->onlyMethods(['info', 'error'])
+            ->getMock();
+
+        $mockDisk = Mockery::mock(Filesystem::class);
+        $mockAdapter = Mockery::mock(HuaweiObsAdapter::class);
+
+        $mockDisk->shouldReceive('put')
+            ->once()
+            ->andReturn(true);
+
+        $mockDisk->shouldReceive('delete')
+            ->once()
+            ->andReturn(true);
+
+        $mockDisk->shouldReceive('exists')
+            ->once()
+            ->andReturn(false);
+
+        $command->expects($this->exactly(4))
+            ->method('info');
+
+        $command->expects($this->never())
+            ->method('error');
+
+        // Use reflection to access the private testDeleteOperations method
+        $reflection = new \ReflectionClass($command);
+        $testDeleteMethod = $reflection->getMethod('testDeleteOperations');
+        $testDeleteMethod->setAccessible(true);
+
+        $testDeleteMethod->invoke($command, $mockDisk, $mockAdapter);
+    }
+
+    public function test_test_delete_operations_deletion_failure(): void
+    {
+        $command = $this->getMockBuilder(TestHuaweiObsCommand::class)
+            ->onlyMethods(['info', 'error'])
+            ->getMock();
+
+        $mockDisk = Mockery::mock(Filesystem::class);
+        $mockAdapter = Mockery::mock(HuaweiObsAdapter::class);
+
+        $mockDisk->shouldReceive('put')
+            ->once()
+            ->andReturn(true);
+
+        $mockDisk->shouldReceive('delete')
+            ->once()
+            ->andReturn(false);
+
+        $command->expects($this->once())
+            ->method('info');
+
+        $command->expects($this->once())
+            ->method('error');
+
+        // Use reflection to access the private testDeleteOperations method
+        $reflection = new \ReflectionClass($command);
+        $testDeleteMethod = $reflection->getMethod('testDeleteOperations');
+        $testDeleteMethod->setAccessible(true);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('File deletion failed');
+
+        $testDeleteMethod->invoke($command, $mockDisk, $mockAdapter);
+    }
+
+    public function test_test_delete_operations_existence_verification_failure(): void
+    {
+        $command = $this->getMockBuilder(TestHuaweiObsCommand::class)
+            ->onlyMethods(['info', 'error'])
+            ->getMock();
+
+        $mockDisk = Mockery::mock(Filesystem::class);
+        $mockAdapter = Mockery::mock(HuaweiObsAdapter::class);
+
+        $mockDisk->shouldReceive('put')
+            ->once()
+            ->andReturn(true);
+
+        $mockDisk->shouldReceive('delete')
+            ->once()
+            ->andReturn(true);
+
+        $mockDisk->shouldReceive('exists')
+            ->once()
+            ->andReturn(true); // File still exists
+
+        $command->expects($this->exactly(2))
+            ->method('info');
+
+        $command->expects($this->once())
+            ->method('error');
+
+        // Use reflection to access the private testDeleteOperations method
+        $reflection = new \ReflectionClass($command);
+        $testDeleteMethod = $reflection->getMethod('testDeleteOperations');
+        $testDeleteMethod->setAccessible(true);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('File still exists after deletion');
+
+        $testDeleteMethod->invoke($command, $mockDisk, $mockAdapter);
+    }
+
     protected function tearDown(): void
     {
         Mockery::close();
