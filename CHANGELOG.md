@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0](https://github.com/mubbi/laravel-flysystem-huawei-obs/compare/v1.1.2...v1.2.0) (2025-08-01)
+
+
+### Features
+
+* support flystem v2 and guzzle 6.3 ([499f45a](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/499f45a97036c450e60595c3d152519aba52c3f6))
+
 ## [1.1.2](https://github.com/mubbi/laravel-flysystem-huawei-obs/compare/v1.1.1...v1.1.2) (2025-08-01)
 
 
