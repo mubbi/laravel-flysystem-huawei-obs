@@ -285,7 +285,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
 
             $visibility = $this->aclToVisibility($result['Grants'] ?? []);
 
-            return new FileAttributes($path, null, $visibility);
+            return new FileAttributes($path, 0, $visibility);
         } catch (ObsException $e) {
             throw UnableToRetrieveMetadata::visibility($path, $e->getMessage(), $e);
         }
@@ -302,7 +302,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
 
             $mimeType = $result['ContentType'] ?? 'application/octet-stream';
 
-            return new FileAttributes($path, null, null, null, $mimeType);
+            return new FileAttributes($path, 0, null, time(), $mimeType);
         } catch (ObsException $e) {
             throw UnableToRetrieveMetadata::mimeType($path, $e->getMessage(), $e);
         }
@@ -319,7 +319,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
 
             $lastModified = strtotime($result['LastModified'] ?? 'now');
 
-            return new FileAttributes($path, null, null, $lastModified);
+            return new FileAttributes($path, 0, null, $lastModified);
         } catch (ObsException $e) {
             throw UnableToRetrieveMetadata::lastModified($path, $e->getMessage(), $e);
         }
@@ -396,9 +396,9 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
 
                         yield new FileAttributes(
                             $relativePath,
-                            (int) $object['Size'],
+                            (int) ($object['Size'] ?? 0),
                             $this->aclToVisibility($object['Grants'] ?? []),
-                            $object['LastModified'] ? (int) strtotime($object['LastModified']) : time()
+                            isset($object['LastModified']) && $object['LastModified'] ? (int) strtotime($object['LastModified']) : time()
                         );
                     }
                 }
