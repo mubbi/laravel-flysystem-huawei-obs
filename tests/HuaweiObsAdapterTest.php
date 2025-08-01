@@ -673,7 +673,7 @@ class HuaweiObsAdapterTest extends TestCase
         $this->assertEquals('https://obs.cn-north-1.myhuaweicloud.com/test-bucket/test-file.txt', $url);
     }
 
-    public function test_url_throws_exception_for_private_object(): void
+    public function test_url_returns_signed_url_for_private_object(): void
     {
         $this->mockClient->shouldReceive('getObjectAcl')
             ->with([
@@ -692,10 +692,115 @@ class HuaweiObsAdapterTest extends TestCase
                 ],
             ]);
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('This driver does not support retrieving URLs for private objects. Use createSignedUrl() for temporary access.');
+        $this->mockClient->shouldReceive('createSignedUrl')
+            ->with([
+                'Method' => 'GET',
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+                'Expires' => 3600,
+                'Headers' => [],
+            ])
+            ->once()
+            ->andReturn([
+                'SignedUrl' => 'https://signed-url.example.com/test-file.txt',
+            ]);
 
-        $this->adapter->url('test-file.txt');
+        $url = $this->adapter->url('test-file.txt');
+        $this->assertEquals('https://signed-url.example.com/test-file.txt', $url);
+    }
+
+    public function test_get_url_method(): void
+    {
+        $this->mockClient->shouldReceive('getObjectAcl')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+            ])
+            ->once()
+            ->andReturn([
+                'Grants' => [
+                    [
+                        'Grantee' => [
+                            'URI' => 'http://acs.amazonaws.com/groups/global/AllUsers',
+                        ],
+                        'Permission' => 'READ',
+                    ],
+                ],
+            ]);
+
+        $this->mockClient->shouldReceive('getConfig')
+            ->once()
+            ->andReturn(['endpoint' => 'https://obs.cn-north-1.myhuaweicloud.com']);
+
+        $url = $this->adapter->getUrl('test-file.txt');
+        $this->assertEquals('https://obs.cn-north-1.myhuaweicloud.com/test-bucket/test-file.txt', $url);
+    }
+
+    public function test_get_temporary_url_method(): void
+    {
+        $expiration = new \DateTime('+1 hour');
+
+        $this->mockClient->shouldReceive('createSignedUrl')
+            ->with([
+                'Method' => 'GET',
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+                'Expires' => 3600,
+                'Headers' => [],
+            ])
+            ->once()
+            ->andReturn([
+                'SignedUrl' => 'https://signed-url.example.com/test-file.txt',
+            ]);
+
+        $url = $this->adapter->getTemporaryUrl('test-file.txt', $expiration);
+        $this->assertEquals('https://signed-url.example.com/test-file.txt', $url);
+    }
+
+    public function test_get_temporary_url_with_custom_options(): void
+    {
+        $expiration = new \DateTime('+2 hours');
+        $options = [
+            'method' => 'PUT',
+            'headers' => ['Content-Type' => 'text/plain'],
+        ];
+
+        $this->mockClient->shouldReceive('createSignedUrl')
+            ->with([
+                'Method' => 'PUT',
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+                'Expires' => 7200,
+                'Headers' => ['Content-Type' => 'text/plain'],
+            ])
+            ->once()
+            ->andReturn([
+                'SignedUrl' => 'https://signed-url.example.com/test-file.txt',
+            ]);
+
+        $url = $this->adapter->getTemporaryUrl('test-file.txt', $expiration, $options);
+        $this->assertEquals('https://signed-url.example.com/test-file.txt', $url);
+    }
+
+    public function test_temporary_upload_url_method(): void
+    {
+        $expiration = new \DateTime('+1 hour');
+
+        $this->mockClient->shouldReceive('createSignedUrl')
+            ->with([
+                'Method' => 'PUT',
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+                'Expires' => 3600,
+                'Headers' => [],
+            ])
+            ->once()
+            ->andReturn([
+                'SignedUrl' => 'https://signed-url.example.com/test-file.txt',
+            ]);
+
+        $url = $this->adapter->temporaryUploadUrl('test-file.txt', $expiration);
+        $this->assertEquals('https://signed-url.example.com/test-file.txt', $url);
     }
 
     public function test_url_throws_exception_for_nonexistent_file(): void

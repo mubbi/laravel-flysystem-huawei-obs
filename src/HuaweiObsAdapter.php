@@ -447,6 +447,8 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
     /**
      * Get the URL for the file at the given path.
      *
+     * For public objects, returns a direct URL.
+     * For private objects, returns a signed URL with 1-hour expiration.
      *
      * @throws \RuntimeException
      */
@@ -477,14 +479,15 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
                 }
             }
 
-            if (! $isPublic) {
-                throw new \RuntimeException('This driver does not support retrieving URLs for private objects. Use createSignedUrl() for temporary access.');
+            if ($isPublic) {
+                // Construct the public URL
+                $endpoint = rtrim($this->client->getConfig()['endpoint'], '/');
+
+                return $endpoint.'/'.$this->bucket.'/'.$key;
+            } else {
+                // For private objects, return a signed URL
+                return $this->createSignedUrl($path, 'GET', 3600);
             }
-
-            // Construct the public URL
-            $endpoint = rtrim($this->client->getConfig()['endpoint'], '/');
-
-            return $endpoint.'/'.$this->bucket.'/'.$key;
 
         } catch (ObsException $e) {
             if ($e->getExceptionCode() === 'NoSuchResource') {
@@ -496,6 +499,83 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
             // Re-throw authentication errors
             throw $e;
         }
+    }
+
+    /**
+     * Get a temporary URL for the file at the given path.
+     *
+     * This method is used by Laravel's FilesystemAdapter::temporaryUrl() method.
+     *
+     * @param  string  $path  The file path
+     * @param  \DateTimeInterface  $expiration  The expiration time
+     * @param  array{method?: string, headers?: array<string, string>}  $options  Additional options
+     * @return string The temporary URL
+     *
+     * @throws \RuntimeException
+     */
+    public function getTemporaryUrl(string $path, \DateTimeInterface $expiration, array $options = []): string
+    {
+        try {
+            $this->checkAuthentication();
+
+            $key = $this->getKey($path);
+            $method = $options['method'] ?? 'GET';
+            $headers = $options['headers'] ?? [];
+
+            // Calculate expiration time in seconds from now
+            $expiresIn = $expiration->getTimestamp() - time();
+
+            // Ensure minimum and maximum expiration times
+            $expiresIn = max(1, min($expiresIn, 604800)); // Between 1 second and 7 days
+
+            return $this->createSignedUrl($path, $method, $expiresIn, $headers);
+
+        } catch (ObsException $e) {
+            if ($e->getExceptionCode() === 'NoSuchResource') {
+                throw new \RuntimeException('File not found: '.$path);
+            }
+
+            throw new \RuntimeException('Unable to create temporary URL: '.$e->getMessage());
+        } catch (\RuntimeException $e) {
+            // Re-throw authentication errors
+            throw $e;
+        }
+    }
+
+    /**
+     * Get the URL for the file at the given path.
+     *
+     * This method is used by Laravel's FilesystemAdapter::url() method.
+     * It's an alias for the url() method for compatibility.
+     *
+     * @param  string  $path  The file path
+     * @return string The URL
+     *
+     * @throws \RuntimeException
+     */
+    public function getUrl(string $path): string
+    {
+        return $this->url($path);
+    }
+
+    /**
+     * Get a temporary upload URL for the file at the given path.
+     *
+     * This method is used by Laravel's FilesystemAdapter for direct uploads.
+     *
+     * @param  string  $path  The file path
+     * @param  \DateTimeInterface  $expiration  The expiration time
+     * @param  array{method?: string, headers?: array<string, string>}  $options  Additional options
+     * @return string The temporary upload URL
+     *
+     * @throws \RuntimeException
+     */
+    public function temporaryUploadUrl(string $path, \DateTimeInterface $expiration, array $options = []): string
+    {
+        // For upload URLs, we typically want PUT method
+        $options['method'] = $options['method'] ?? 'PUT';
+
+        return $this->getTemporaryUrl($path, $expiration, $options);
     }
 
     /**

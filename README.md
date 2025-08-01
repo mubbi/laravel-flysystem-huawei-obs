@@ -321,28 +321,41 @@ $adapter->refreshCredentials('new_access_key', 'new_secret_key', 'new_security_t
 
 ### URL Handling
 
-The adapter supports both public URLs and signed URLs:
+The adapter supports both public URLs and signed URLs, with full Laravel compatibility:
 
-#### Public URLs
+#### Public and Private URLs
 
-For objects with public read access, you can generate direct URLs:
+The `url()` method automatically handles both public and private objects:
 
 ```php
-// Get public URL (only works for public objects)
-$url = Storage::disk('huawei-obs')->url('public-file.txt');
+// For public objects, returns a direct URL
+$publicUrl = Storage::disk('huawei-obs')->url('public-file.txt');
+// Returns: https://obs.example.com/bucket/public-file.txt
 
-// For private objects, this will throw an exception
-try {
-    $url = Storage::disk('huawei-obs')->url('private-file.txt');
-} catch (\RuntimeException $e) {
-    // Handle private object error
-    echo $e->getMessage(); // "This driver does not support retrieving URLs for private objects. Use createSignedUrl() for temporary access."
-}
+// For private objects, automatically returns a signed URL (1-hour expiration)
+$privateUrl = Storage::disk('huawei-obs')->url('private-file.txt');
+// Returns: https://obs.example.com/bucket/private-file.txt?signature=...
 ```
 
-#### Signed URLs
+#### Laravel Temporary URLs
 
-Create temporary URLs for direct access to objects (works for both public and private objects):
+Use Laravel's standard `temporaryUrl()` method for custom expiration times:
+
+```php
+// Create a temporary URL with custom expiration
+$temporaryUrl = Storage::disk('huawei-obs')->temporaryUrl('file.txt', now()->addHours(2));
+
+// With custom options (method, headers, etc.)
+$temporaryUrl = Storage::disk('huawei-obs')->temporaryUrl(
+    'file.txt', 
+    now()->addHours(1), 
+    ['method' => 'PUT', 'headers' => ['Content-Type' => 'text/plain']]
+);
+```
+
+#### Direct Signed URLs
+
+Create temporary URLs directly using the adapter:
 
 ```php
 $adapter = Storage::disk('huawei-obs')->getAdapter();

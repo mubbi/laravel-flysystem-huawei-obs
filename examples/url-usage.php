@@ -50,23 +50,45 @@ try {
 
 echo "\n";
 
-// 3. Error Handling for Private Objects
-echo "3. Error Handling for Private Objects\n";
-echo "-------------------------------------\n";
+// 3. URL for Private Objects (Now Returns Signed URL)
+echo "3. URL for Private Objects (Returns Signed URL)\n";
+echo "-----------------------------------------------\n";
 
 try {
-    // This will throw an exception for private objects
+    // This will now return a signed URL for private objects
     $privateUrl = Storage::disk('huawei-obs')->url('private-file.txt');
-    echo "✓ Private URL: {$privateUrl}\n";
+    echo "✓ Private URL (Signed): {$privateUrl}\n";
+    echo "  → The url() method now automatically returns signed URLs for private objects\n";
 } catch (\RuntimeException $e) {
-    echo "✗ Expected Error for Private Object: {$e->getMessage()}\n";
-    echo "  → Use createSignedUrl() instead for private objects\n";
+    echo "✗ Error: {$e->getMessage()}\n";
 }
 
 echo "\n";
 
-// 4. Complete File Info Example
-echo "4. Complete File Info Example\n";
+// 4. Laravel-Compatible URL Methods
+echo "4. Laravel-Compatible URL Methods\n";
+echo "---------------------------------\n";
+
+try {
+    // Using Laravel's temporaryUrl() method
+    $temporaryUrl = Storage::disk('huawei-obs')->temporaryUrl('example-file.txt', now()->addHour());
+    echo '✓ Temporary URL (Laravel): '.substr($temporaryUrl, 0, 50)."...\n";
+
+    // Using Laravel's temporaryUrl() with custom options
+    $temporaryUrlWithOptions = Storage::disk('huawei-obs')->temporaryUrl(
+        'example-file.txt',
+        now()->addHours(2),
+        ['method' => 'PUT', 'headers' => ['Content-Type' => 'text/plain']]
+    );
+    echo '✓ Temporary URL with Options: '.substr($temporaryUrlWithOptions, 0, 50)."...\n";
+} catch (\Exception $e) {
+    echo "✗ Temporary URL Error: {$e->getMessage()}\n";
+}
+
+echo "\n";
+
+// 5. Complete File Info Example
+echo "5. Complete File Info Example\n";
 echo "-----------------------------\n";
 
 $filePath = 'example-file.txt';
