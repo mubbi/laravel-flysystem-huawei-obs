@@ -31,6 +31,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: mbstring, pdo_sqlite, intl
+          coverage: xdebug
 
       - name: Install Laravel Testbench
         run: |
@@ -47,9 +48,26 @@ jobs:
       - name: Install dependencies
         run: composer update --prefer-dist --no-interaction
 
-      - name: Run PHPUnit Tests
-        run: vendor/bin/phpunit
+      - name: Run PHPUnit Tests with Coverage
+        run: vendor/bin/phpunit --coverage-clover=coverage.xml --coverage-text
 
+      - name: Verify coverage file exists
+        run: |
+          if [ ! -f coverage.xml ]; then
+            echo "Error: coverage.xml file was not generated"
+            exit 1
+          fi
+          echo "Coverage file size: $(wc -c < coverage.xml) bytes"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          verbose: true
 
   phpstan:
     name: PHPStan Analysis
