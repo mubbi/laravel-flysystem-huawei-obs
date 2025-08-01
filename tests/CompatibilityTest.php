@@ -14,6 +14,10 @@ class CompatibilityTest extends TestCase
         $version = HttpClientFactory::detectGuzzleVersion();
 
         $this->assertContains($version, ['v6', 'v7', 'v8']);
+        
+        // Additional test to ensure the version is a valid string
+        $this->assertIsString($version);
+        $this->assertMatchesRegularExpression('/^v[678]$/', $version);
     }
 
     public function test_http_client_factory_creates_client(): void
