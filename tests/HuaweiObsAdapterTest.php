@@ -1141,7 +1141,7 @@ class HuaweiObsAdapterTest extends TestCase
             ->once()
             ->andReturn(['HttpStatusCode' => 200]);
 
-        $this->adapter->move('source.txt', 'destination.txt', new Config());
+        $this->adapter->move('source.txt', 'destination.txt', new Config);
         $this->assertTrue(true); // Assert that no exception was thrown
     }
 
@@ -1164,7 +1164,7 @@ class HuaweiObsAdapterTest extends TestCase
             ->andThrow($exception);
 
         $this->expectException(\League\Flysystem\UnableToCopyFile::class);
-        $this->adapter->copy('source.txt', 'destination.txt', new Config());
+        $this->adapter->copy('source.txt', 'destination.txt', new Config);
     }
 
     public function test_private_helper_methods(): void
@@ -1308,8 +1308,6 @@ class HuaweiObsAdapterTest extends TestCase
 
         $this->adapter->fileExists('test-file.txt');
     }
-
-
 
     public function test_constructor_with_http_client(): void
     {

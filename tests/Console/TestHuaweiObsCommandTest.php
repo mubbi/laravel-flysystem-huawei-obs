@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace LaravelFlysystemHuaweiObs\Tests\Console;
 
 use Illuminate\Contracts\Filesystem\Filesystem;
-use Illuminate\Support\Facades\Storage;
 use LaravelFlysystemHuaweiObs\Console\TestHuaweiObsCommand;
 use LaravelFlysystemHuaweiObs\HuaweiObsAdapter;
 use LaravelFlysystemHuaweiObs\HuaweiObsServiceProvider;
