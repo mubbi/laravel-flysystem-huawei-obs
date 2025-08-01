@@ -127,24 +127,24 @@ class HttpClientFactory
         if ($reflection->hasMethod('getConfig')) {
             // Try to distinguish between v7 and v8 by checking for v8-specific features
             // Guzzle v8 has PSR-18 compliance and some additional methods
-            if (interface_exists('Psr\Http\Client\ClientInterface') && 
+            if (interface_exists('Psr\Http\Client\ClientInterface') &&
                 $reflection->implementsInterface('Psr\Http\Client\ClientInterface')) {
                 return 'v8';
             }
-            
+
             // Check for v8-specific methods or properties
-            if ($reflection->hasMethod('sendRequest') && 
+            if ($reflection->hasMethod('sendRequest') &&
                 method_exists(Client::class, 'sendRequest')) {
                 // Additional check for v8-specific behavior
                 $sendRequestMethod = $reflection->getMethod('sendRequest');
                 $parameters = $sendRequestMethod->getParameters();
-                if (count($parameters) === 1 && 
-                    $parameters[0]->getType() && 
+                if (count($parameters) === 1 &&
+                    $parameters[0]->getType() &&
                     $parameters[0]->getType()->getName() === 'Psr\Http\Message\RequestInterface') {
                     return 'v8';
                 }
             }
-            
+
             return 'v7';
         }
 
