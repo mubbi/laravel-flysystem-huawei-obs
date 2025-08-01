@@ -34,7 +34,13 @@ jobs:
 
       - name: Install Laravel Testbench
         run: |
-          composer require "orchestra/testbench:^${{ matrix.laravel }}" --dev --no-interaction --no-update
+          if [ "${{ matrix.laravel }}" = "9.0" ]; then
+            composer require "orchestra/testbench:^7.0" --dev --no-interaction --no-update
+          elif [ "${{ matrix.laravel }}" = "10.0" ]; then
+            composer require "orchestra/testbench:^8.0" --dev --no-interaction --no-update
+          elif [ "${{ matrix.laravel }}" = "11.0" ]; then
+            composer require "orchestra/testbench:^9.0" --dev --no-interaction --no-update
+          fi
 
       - name: Install dependencies
         run: composer update --prefer-dist --no-interaction
