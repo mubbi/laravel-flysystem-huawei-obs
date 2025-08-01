@@ -862,9 +862,8 @@ class HuaweiObsAdapterTest extends TestCase
         $adapter->createSignedUrl('test-file.txt');
     }
 
-    public function test_logging_disabled_by_default(): void
+    public function test_logging_enabled_with_operations(): void
     {
-        // Create adapter with logging disabled
         $adapter = new HuaweiObsAdapter(
             $this->accessKeyId,
             $this->secretAccessKey,
@@ -875,18 +874,17 @@ class HuaweiObsAdapterTest extends TestCase
             null,
             3,
             1,
-            false, // loggingEnabled
-            false, // logOperations
-            false  // logErrors
+            true, // loggingEnabled
+            true, // logOperations
+            true  // logErrors
         );
 
-        // Replace with mock client
+        // Replace the client with our mock
         $reflection = new \ReflectionClass($adapter);
         $clientProperty = $reflection->getProperty('client');
         $clientProperty->setAccessible(true);
         $clientProperty->setValue($adapter, $this->mockClient);
 
-        // Mock successful operation
         $this->mockClient->shouldReceive('headBucket')
             ->with(['Bucket' => $this->bucket])
             ->andReturn(['HttpStatusCode' => 200]);
@@ -896,15 +894,306 @@ class HuaweiObsAdapterTest extends TestCase
                 'Bucket' => $this->bucket,
                 'Key' => 'test-file.txt',
             ])
+            ->once()
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        // Test that logging doesn't interfere with normal operations
+        $this->assertTrue($adapter->fileExists('test-file.txt'));
+    }
+
+    public function test_logging_enabled_with_errors(): void
+    {
+        $adapter = new HuaweiObsAdapter(
+            $this->accessKeyId,
+            $this->secretAccessKey,
+            $this->bucket,
+            $this->endpoint,
+            null,
+            null,
+            null,
+            3,
+            1,
+            true, // loggingEnabled
+            false, // logOperations
+            true   // logErrors
+        );
+
+        // Replace the client with our mock
+        $reflection = new \ReflectionClass($adapter);
+        $clientProperty = $reflection->getProperty('client');
+        $clientProperty->setAccessible(true);
+        $clientProperty->setValue($adapter, $this->mockClient);
+
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $exception = new ObsException('Test error');
+        $exception->setExceptionCode('TestError');
+
+        $this->mockClient->shouldReceive('getObjectMetadata')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+            ])
+            ->once()
+            ->andThrow($exception);
+
+        // Test that error logging doesn't interfere with exception handling
+        $this->expectException(UnableToCheckFileExistence::class);
+        $adapter->fileExists('test-file.txt');
+    }
+
+    public function test_log_operation_method_coverage(): void
+    {
+        $adapter = new HuaweiObsAdapter(
+            $this->accessKeyId,
+            $this->secretAccessKey,
+            $this->bucket,
+            $this->endpoint,
+            null,
+            null,
+            null,
+            3,
+            1,
+            true, // loggingEnabled
+            true, // logOperations
+            true  // logErrors
+        );
+
+        // Replace the client with our mock
+        $reflection = new \ReflectionClass($adapter);
+        $clientProperty = $reflection->getProperty('client');
+        $clientProperty->setAccessible(true);
+        $clientProperty->setValue($adapter, $this->mockClient);
+
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $this->mockClient->shouldReceive('getObjectMetadata')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+            ])
+            ->once()
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        // This will trigger logOperation internally
+        $adapter->fileExists('test-file.txt');
+
+        // Test passes if no exception is thrown
+        $this->assertTrue(true);
+    }
+
+    public function test_log_error_method_coverage(): void
+    {
+        $adapter = new HuaweiObsAdapter(
+            $this->accessKeyId,
+            $this->secretAccessKey,
+            $this->bucket,
+            $this->endpoint,
+            null,
+            null,
+            null,
+            3,
+            1,
+            true, // loggingEnabled
+            false, // logOperations
+            true   // logErrors
+        );
+
+        // Replace the client with our mock
+        $reflection = new \ReflectionClass($adapter);
+        $clientProperty = $reflection->getProperty('client');
+        $clientProperty->setAccessible(true);
+        $clientProperty->setValue($adapter, $this->mockClient);
+
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $exception = new ObsException('Test error');
+        $exception->setExceptionCode('TestError');
+
+        $this->mockClient->shouldReceive('getObjectMetadata')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+            ])
+            ->once()
+            ->andThrow($exception);
+
+        // This will trigger logError internally
+        $this->expectException(UnableToCheckFileExistence::class);
+        $adapter->fileExists('test-file.txt');
+    }
+
+    public function test_visibility_with_invalid_grants(): void
+    {
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $this->mockClient->shouldReceive('getObjectAcl')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+            ])
+            ->once()
             ->andReturn([
-                'HttpStatusCode' => 200,
-                'ContentLength' => 100,
-                'LastModified' => '2023-01-01T00:00:00Z',
+                'Grants' => [
+                    ['Grantee' => ['URI' => 'invalid-uri'], 'Permission' => 'READ'],
+                ],
             ]);
 
-        // Should not throw any logging-related errors
-        $result = $adapter->fileExists('test-file.txt');
-        $this->assertTrue($result);
+        $result = $this->adapter->visibility('test-file.txt');
+        $this->assertInstanceOf(FileAttributes::class, $result);
+        $this->assertEquals(Visibility::PRIVATE, $result->visibility());
+    }
+
+    public function test_mime_type_with_missing_content_type(): void
+    {
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $this->mockClient->shouldReceive('getObjectMetadata')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+            ])
+            ->once()
+            ->andReturn([
+                'HttpStatusCode' => 200,
+                // Missing ContentType
+            ]);
+
+        $result = $this->adapter->mimeType('test-file.txt');
+        $this->assertInstanceOf(FileAttributes::class, $result);
+        $this->assertEquals('application/octet-stream', $result->mimeType());
+    }
+
+    public function test_last_modified_with_missing_date(): void
+    {
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $this->mockClient->shouldReceive('getObjectMetadata')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+            ])
+            ->once()
+            ->andReturn([
+                'HttpStatusCode' => 200,
+                // Missing LastModified
+            ]);
+
+        $result = $this->adapter->lastModified('test-file.txt');
+        $this->assertInstanceOf(FileAttributes::class, $result);
+        $this->assertIsInt($result->lastModified());
+    }
+
+    public function test_file_size_with_missing_size(): void
+    {
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $this->mockClient->shouldReceive('getObjectMetadata')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+            ])
+            ->once()
+            ->andReturn([
+                'HttpStatusCode' => 200,
+                // Missing ContentLength
+            ]);
+
+        $result = $this->adapter->fileSize('test-file.txt');
+        $this->assertInstanceOf(FileAttributes::class, $result);
+        $this->assertEquals(0, $result->fileSize());
+    }
+
+    public function test_move_with_destination_exists(): void
+    {
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $this->mockClient->shouldReceive('copyObject')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'destination.txt',
+                'CopySource' => $this->bucket.'/source.txt',
+            ])
+            ->once()
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $this->mockClient->shouldReceive('deleteObject')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'source.txt',
+            ])
+            ->once()
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $this->adapter->move('source.txt', 'destination.txt', new Config());
+        $this->assertTrue(true); // Assert that no exception was thrown
+    }
+
+    public function test_copy_with_error(): void
+    {
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $exception = new ObsException('Copy failed');
+        $exception->setExceptionCode('CopyError');
+
+        $this->mockClient->shouldReceive('copyObject')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'destination.txt',
+                'CopySource' => $this->bucket.'/source.txt',
+            ])
+            ->once()
+            ->andThrow($exception);
+
+        $this->expectException(\League\Flysystem\UnableToCopyFile::class);
+        $this->adapter->copy('source.txt', 'destination.txt', new Config());
+    }
+
+    public function test_private_helper_methods(): void
+    {
+        $reflection = new \ReflectionClass($this->adapter);
+
+        // Test getKey method
+        $getKeyMethod = $reflection->getMethod('getKey');
+        $getKeyMethod->setAccessible(true);
+        $this->assertEquals('test-file.txt', $getKeyMethod->invoke($this->adapter, 'test-file.txt'));
+
+        // Test getRelativePath method
+        $getRelativePathMethod = $reflection->getMethod('getRelativePath');
+        $getRelativePathMethod->setAccessible(true);
+        $this->assertEquals('/test-file.txt', $getRelativePathMethod->invoke($this->adapter, 'test-file.txt'));
+
+        // Test visibilityToAcl method
+        $visibilityToAclMethod = $reflection->getMethod('visibilityToAcl');
+        $visibilityToAclMethod->setAccessible(true);
+        $this->assertEquals('public-read', $visibilityToAclMethod->invoke($this->adapter, Visibility::PUBLIC));
+        $this->assertEquals('private', $visibilityToAclMethod->invoke($this->adapter, Visibility::PRIVATE));
+
+        // Test aclToVisibility method
+        $aclToVisibilityMethod = $reflection->getMethod('aclToVisibility');
+        $aclToVisibilityMethod->setAccessible(true);
+        $this->assertEquals(Visibility::PUBLIC, $aclToVisibilityMethod->invoke($this->adapter, [
+            ['Grantee' => ['URI' => 'http://acs.amazonaws.com/groups/global/AllUsers'], 'Permission' => 'READ'],
+        ]));
+        $this->assertEquals(Visibility::PRIVATE, $aclToVisibilityMethod->invoke($this->adapter, []));
     }
 
     public function test_authentication_cache_expiry(): void
@@ -1020,6 +1309,8 @@ class HuaweiObsAdapterTest extends TestCase
         $this->adapter->fileExists('test-file.txt');
     }
 
+
+
     public function test_constructor_with_http_client(): void
     {
         $httpClient = new \GuzzleHttp\Client(['timeout' => 30]);
@@ -1080,5 +1371,31 @@ class HuaweiObsAdapterTest extends TestCase
         );
 
         $this->assertInstanceOf(HuaweiObsAdapter::class, $adapter);
+    }
+
+    public function test_write_with_visibility_and_mime_type(): void
+    {
+        $this->mockClient->shouldReceive('headBucket')
+            ->with(['Bucket' => $this->bucket])
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $this->mockClient->shouldReceive('putObject')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+                'Body' => 'test content',
+                'ACL' => 'public-read',
+                'ContentType' => 'text/plain',
+            ])
+            ->once()
+            ->andReturn(['HttpStatusCode' => 200]);
+
+        $config = new Config([
+            'visibility' => Visibility::PUBLIC,
+            'mimetype' => 'text/plain',
+        ]);
+
+        $this->adapter->write('test-file.txt', 'test content', $config);
+        $this->assertTrue(true); // Assert that no exception was thrown
     }
 }
