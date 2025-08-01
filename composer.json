@@ -1,8 +1,8 @@
 {
   "name": "mubbi/laravel-flysystem-huawei-obs",
-  "description": "Laravel Flysystem v3 adapter for Huawei Object Storage Service (OBS)",
+  "description": "Laravel Flysystem v3 adapter for Huawei Object Storage Service (OBS) with v2 compatibility",
   "type": "library",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "license": "MIT",
   "keywords": [
     "laravel",
@@ -21,10 +21,10 @@
   ],
   "require": {
     "php": "^8.1",
-    "league/flysystem": "^3.0",
+    "league/flysystem": "^2.0|^3.0",
     "laravel/framework": "^9.0|^10.0|^11.0|^12.0",
     "obs/esdk-obs-php": "^3.24.9",
-    "guzzlehttp/guzzle": "^7.0|^8.0"
+    "guzzlehttp/guzzle": "^6.3.0|^7.0|^8.0"
   },
   "require-dev": {
     "orchestra/testbench": "^7.0|^8.0|^9.0|^10.0",
@@ -33,6 +33,13 @@
     "laravel/pint": "^1.0",
     "mockery/mockery": "^1.6",
     "fakerphp/faker": "^1.23"
+  },
+  "conflict": {
+    "league/flysystem": "<2.0|>=4.0",
+    "guzzlehttp/guzzle": "<6.3.0|>=9.0"
+  },
+  "provide": {
+    "league/flysystem-adapter": "self.version"
   },
   "autoload": {
     "psr-4": {
