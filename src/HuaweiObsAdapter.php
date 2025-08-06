@@ -214,8 +214,23 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
             // List all objects with the prefix
             $objects = [];
             $marker = null;
+            $lastMarker = null; // Track the last marker to detect stuck pagination
+            $maxIterations = 100; // Safety limit to prevent infinite loops
+            $iterationCount = 0;
 
             do {
+                $iterationCount++;
+
+                // Safety check to prevent infinite loops
+                if ($iterationCount > $maxIterations) {
+                    throw new \RuntimeException('Maximum iterations reached. Possible infinite loop detected.');
+                }
+
+                // Additional safety check: if we've seen this marker before, break
+                if ($marker !== null && $marker === $lastMarker) {
+                    break;
+                }
+
                 $result = $this->client->listObjects([
                     'Bucket' => $this->bucket,
                     'Prefix' => $key,
@@ -229,7 +244,24 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
                     }
                 }
 
-                $marker = $result['NextMarker'] ?? null;
+                // Get the next marker
+                $nextMarker = $result['NextMarker'] ?? null;
+
+                // Safety checks to prevent infinite loop
+                if ($nextMarker === null) {
+                    // No more pages
+                    break;
+                }
+
+                if ($nextMarker === $marker) {
+                    // Same marker returned - potential infinite loop
+                    break;
+                }
+
+                // Update markers for next iteration
+                $lastMarker = $marker;
+                $marker = $nextMarker;
+
             } while ($marker !== null);
 
             // Delete all objects in the directory
@@ -354,6 +386,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
             $processedKeys = [];
             $maxIterations = 100; // Safety limit to prevent infinite loops
             $iterationCount = 0;
+            $lastMarker = null; // Track the last marker to detect stuck pagination
 
             do {
                 $iterationCount++;
@@ -361,6 +394,11 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
                 // Safety check to prevent infinite loops
                 if ($iterationCount > $maxIterations) {
                     throw new \RuntimeException('Maximum iterations reached. Possible infinite loop detected.');
+                }
+
+                // Additional safety check: if we've seen this marker before, break
+                if ($marker !== null && $marker === $lastMarker) {
+                    break;
                 }
 
                 $options = [
@@ -420,14 +458,22 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
                     }
                 }
 
-                // Get the next marker, but ensure it's different from the current one
+                // Get the next marker
                 $nextMarker = $result['NextMarker'] ?? null;
 
-                // Safety check: if the next marker is the same as current, break to prevent infinite loop
-                if ($nextMarker === $marker || $nextMarker === null) {
+                // Safety checks to prevent infinite loop
+                if ($nextMarker === null) {
+                    // No more pages
                     break;
                 }
 
+                if ($nextMarker === $marker) {
+                    // Same marker returned - potential infinite loop
+                    break;
+                }
+
+                // Update markers for next iteration
+                $lastMarker = $marker;
                 $marker = $nextMarker;
 
             } while ($marker !== null);
@@ -760,6 +806,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
             $startTime = time();
             $maxIterations = 100; // Safety limit to prevent infinite loops
             $iterationCount = 0;
+            $lastMarker = null; // Track the last marker to detect stuck pagination
 
             do {
                 $iterationCount++;
@@ -772,6 +819,11 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
                 // Safety check to prevent infinite loops
                 if ($iterationCount > $maxIterations) {
                     throw new \RuntimeException('Maximum iterations reached. Possible infinite loop detected.');
+                }
+
+                // Additional safety check: if we've seen this marker before, break
+                if ($marker !== null && $marker === $lastMarker) {
+                    break;
                 }
 
                 $options = [
@@ -845,14 +897,22 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
                     }
                 }
 
-                // Get the next marker, but ensure it's different from the current one
+                // Get the next marker
                 $nextMarker = $result['NextMarker'] ?? null;
 
-                // Safety check: if the next marker is the same as current, break to prevent infinite loop
-                if ($nextMarker === $marker || $nextMarker === null) {
+                // Safety checks to prevent infinite loop
+                if ($nextMarker === null) {
+                    // No more pages
                     break;
                 }
 
+                if ($nextMarker === $marker) {
+                    // Same marker returned - potential infinite loop
+                    break;
+                }
+
+                // Update markers for next iteration
+                $lastMarker = $marker;
                 $marker = $nextMarker;
 
             } while ($marker !== null);

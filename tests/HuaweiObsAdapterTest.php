@@ -2057,4 +2057,96 @@ class HuaweiObsAdapterTest extends TestCase
         $this->assertEquals(0, $contents[0]->fileSize());
         $this->assertIsInt($contents[0]->lastModified());
     }
+
+    public function test_list_contents_handles_stc_tv_locale_images_path_without_infinite_loop(): void
+    {
+        // Test the specific path that was causing infinite loops
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => 'stc-tv/locale/images/',
+                'Delimiter' => '/',
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'stc-tv/locale/images/file1.jpg',
+                        'Size' => 1024,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ],
+                    [
+                        'Key' => 'stc-tv/locale/images/file2.png',
+                        'Size' => 2048,
+                        'LastModified' => '2023-01-02T00:00:00Z',
+                    ],
+                ],
+                'CommonPrefixes' => [
+                    ['Prefix' => 'stc-tv/locale/images/subdir/'],
+                ],
+            ]);
+
+        $contents = iterator_to_array($this->adapter->listContents('/stc-tv/locale/images', false));
+
+        $this->assertCount(3, $contents);
+        $this->assertInstanceOf(FileAttributes::class, $contents[0]);
+        $this->assertInstanceOf(FileAttributes::class, $contents[1]);
+        $this->assertInstanceOf(DirectoryAttributes::class, $contents[2]);
+        $this->assertEquals('stc-tv/locale/images/file1.jpg', $contents[0]->path());
+        $this->assertEquals('stc-tv/locale/images/file2.png', $contents[1]->path());
+        $this->assertEquals('stc-tv/locale/images/subdir', $contents[2]->path());
+    }
+
+    public function test_list_contents_prevents_infinite_loop_with_repeated_markers(): void
+    {
+        // Simulate a scenario where the API returns the same marker repeatedly
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => 'test/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'test/file1.txt',
+                        'Size' => 100,
+                        'LastModified' => '2023-01-01T00:00:00Z',
+                    ],
+                ],
+                'NextMarker' => 'test/file1.txt',
+            ]);
+
+        $this->mockClient->shouldReceive('listObjects')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Prefix' => 'test/',
+                'Delimiter' => null,
+                'MaxKeys' => 1000,
+                'Marker' => 'test/file1.txt',
+            ])
+            ->once()
+            ->andReturn([
+                'Contents' => [
+                    [
+                        'Key' => 'test/file2.txt',
+                        'Size' => 200,
+                        'LastModified' => '2023-01-02T00:00:00Z',
+                    ],
+                ],
+                'NextMarker' => 'test/file1.txt', // Same marker - should trigger infinite loop prevention
+            ]);
+
+        $contents = iterator_to_array($this->adapter->listContents('test', true));
+
+        // Should return both items from the first two API calls before detecting duplicate marker
+        $this->assertCount(2, $contents);
+        $this->assertInstanceOf(FileAttributes::class, $contents[0]);
+        $this->assertInstanceOf(FileAttributes::class, $contents[1]);
+        $this->assertEquals('test/file1.txt', $contents[0]->path());
+        $this->assertEquals('test/file2.txt', $contents[1]->path());
+    }
 }
