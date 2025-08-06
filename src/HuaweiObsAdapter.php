@@ -51,7 +51,8 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
 
             return $result['HttpStatusCode'] === 200;
         } catch (ObsException $e) {
-            if ($e->getExceptionCode() === 'NoSuchResource') {
+            // Check for file not found errors
+            if ($this->isNotFoundError($e)) {
                 return false;
             }
 
@@ -78,6 +79,11 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
 
             return ! empty($result['Contents']);
         } catch (ObsException $e) {
+            // Check for directory not found errors
+            if ($this->isNotFoundError($e)) {
+                return false;
+            }
+
             throw UnableToCheckDirectoryExistence::forLocation($path, $e);
         } catch (\RuntimeException $e) {
             // Re-throw authentication errors
@@ -157,6 +163,11 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
             // Convert the CheckoutStream to string
             return (string) $result['Body'];
         } catch (ObsException $e) {
+            // Check for file not found errors
+            if ($this->isNotFoundError($e)) {
+                throw UnableToReadFile::fromLocation($path, 'File not found', $e);
+            }
+
             throw UnableToReadFile::fromLocation($path, $e->getMessage(), $e);
         } catch (\RuntimeException $e) {
             // Re-throw authentication errors
@@ -185,6 +196,11 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
 
             return $stream;
         } catch (ObsException $e) {
+            // Check for file not found errors
+            if ($this->isNotFoundError($e)) {
+                throw UnableToReadFile::fromLocation($path, 'File not found', $e);
+            }
+
             throw UnableToReadFile::fromLocation($path, $e->getMessage(), $e);
         } catch (\RuntimeException $e) {
             // Re-throw authentication errors
@@ -319,6 +335,11 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
 
             return new FileAttributes($path, 0, $visibility);
         } catch (ObsException $e) {
+            // Check for file not found errors
+            if ($this->isNotFoundError($e)) {
+                throw UnableToRetrieveMetadata::visibility($path, 'File not found', $e);
+            }
+
             throw UnableToRetrieveMetadata::visibility($path, $e->getMessage(), $e);
         }
     }
@@ -336,6 +357,11 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
 
             return new FileAttributes($path, 0, null, time(), $mimeType);
         } catch (ObsException $e) {
+            // Check for file not found errors
+            if ($this->isNotFoundError($e)) {
+                throw UnableToRetrieveMetadata::mimeType($path, 'File not found', $e);
+            }
+
             throw UnableToRetrieveMetadata::mimeType($path, $e->getMessage(), $e);
         }
     }
@@ -353,6 +379,11 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
 
             return new FileAttributes($path, 0, null, $lastModified);
         } catch (ObsException $e) {
+            // Check for file not found errors
+            if ($this->isNotFoundError($e)) {
+                throw UnableToRetrieveMetadata::lastModified($path, 'File not found', $e);
+            }
+
             throw UnableToRetrieveMetadata::lastModified($path, $e->getMessage(), $e);
         }
     }
@@ -370,6 +401,11 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
 
             return new FileAttributes($path, $fileSize);
         } catch (ObsException $e) {
+            // Check for file not found errors
+            if ($this->isNotFoundError($e)) {
+                throw UnableToRetrieveMetadata::fileSize($path, 'File not found', $e);
+            }
+
             throw UnableToRetrieveMetadata::fileSize($path, $e->getMessage(), $e);
         }
     }
@@ -569,7 +605,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
                 return $this->createSignedUrl($path, 'GET', 3600);
             }
         } catch (ObsException $e) {
-            if ($e->getExceptionCode() === 'NoSuchResource') {
+            if ($this->isNotFoundError($e)) {
                 throw new \RuntimeException('File not found: '.$path);
             }
 
@@ -610,7 +646,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
             return $this->createSignedUrl($path, $method, $expiresIn, $headers);
 
         } catch (ObsException $e) {
-            if ($e->getExceptionCode() === 'NoSuchResource') {
+            if ($this->isNotFoundError($e)) {
                 throw new \RuntimeException('File not found: '.$path);
             }
 

@@ -106,6 +106,50 @@ class HuaweiObsAdapterTest extends TestCase
         $this->assertFalse($this->adapter->fileExists('test-file.txt'));
     }
 
+    public function test_file_exists_returns_false_when_file_does_not_exist_with_nosuchkey(): void
+    {
+        $exception = new ObsException('NoSuchKey');
+        $exception->setExceptionCode('NoSuchKey');
+
+        $this->mockClient->shouldReceive('getObjectMetadata')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+            ])
+            ->once()
+            ->andThrow($exception);
+
+        $this->assertFalse($this->adapter->fileExists('test-file.txt'));
+    }
+
+    public function test_file_exists_returns_false_when_file_does_not_exist_with_real_world_exception(): void
+    {
+        // Create a mock exception that simulates the real-world scenario
+        $exception = new ObsException('Request failed: Client error: `HEAD https://example.com/test-file.txt` resulted in a `404 Not Found` response');
+        
+        // Mock the response property to simulate the real-world structure
+        $mockResponse = \Mockery::mock('GuzzleHttp\Psr7\Response');
+        $mockResponse->shouldReceive('getHeader')
+            ->with('x-obs-error-code')
+            ->andReturn(['NoSuchKey']);
+        
+        // Use reflection to set the response property
+        $reflection = new \ReflectionClass($exception);
+        $responseProperty = $reflection->getProperty('response');
+        $responseProperty->setAccessible(true);
+        $responseProperty->setValue($exception, $mockResponse);
+
+        $this->mockClient->shouldReceive('getObjectMetadata')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'test-file.txt',
+            ])
+            ->once()
+            ->andThrow($exception);
+
+        $this->assertFalse($this->adapter->fileExists('test-file.txt'));
+    }
+
     public function test_file_exists_throws_exception_on_other_errors(): void
     {
         $exception = new ObsException('Network error');
@@ -824,16 +868,38 @@ class HuaweiObsAdapterTest extends TestCase
 
     public function test_url_throws_exception_for_nonexistent_file(): void
     {
+        $exception = new \Obs\ObsException('NoSuchResource');
+        $exception->setExceptionCode('NoSuchResource');
+
         $this->mockClient->shouldReceive('getObjectAcl')
             ->with([
                 'Bucket' => $this->bucket,
                 'Key' => 'nonexistent-file.txt',
             ])
             ->once()
-            ->andThrow(new \Obs\ObsException('NoSuchResource'));
+            ->andThrow($exception);
 
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Unable to retrieve URL: NoSuchResource');
+        $this->expectExceptionMessage('File not found: nonexistent-file.txt');
+
+        $this->adapter->url('nonexistent-file.txt');
+    }
+
+    public function test_url_throws_exception_for_nonexistent_file_with_nosuchkey(): void
+    {
+        $exception = new \Obs\ObsException('NoSuchKey');
+        $exception->setExceptionCode('NoSuchKey');
+
+        $this->mockClient->shouldReceive('getObjectAcl')
+            ->with([
+                'Bucket' => $this->bucket,
+                'Key' => 'nonexistent-file.txt',
+            ])
+            ->once()
+            ->andThrow($exception);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('File not found: nonexistent-file.txt');
 
         $this->adapter->url('nonexistent-file.txt');
     }

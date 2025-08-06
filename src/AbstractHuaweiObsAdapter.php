@@ -106,9 +106,8 @@ abstract class AbstractHuaweiObsAdapter
                 $this->authCacheExpiry = time() + 300; // Cache for 5 minutes
             } catch (ObsException $e) {
                 $this->authenticated = false;
-                $errorCode = $e->getExceptionCode();
 
-                if ($errorCode === 'AccessDenied' || $errorCode === 'InvalidAccessKeyId' || $errorCode === 'SignatureDoesNotMatch') {
+                if ($this->isAuthenticationError($e)) {
                     throw new \RuntimeException(
                         'Authentication failed. Please check your Huawei OBS credentials (Access Key ID, Secret Access Key, and Security Token if using temporary credentials). Error: '.$e->getMessage(),
                         0,
@@ -116,7 +115,7 @@ abstract class AbstractHuaweiObsAdapter
                     );
                 }
 
-                if ($errorCode === 'NoSuchBucket') {
+                if ($this->isBucketError($e)) {
                     throw new \RuntimeException(
                         "Bucket '{$this->bucket}' does not exist or you don't have access to it. Please check your bucket configuration.",
                         0,
@@ -151,7 +150,7 @@ abstract class AbstractHuaweiObsAdapter
                 $attempts++;
 
                 // Don't retry on authentication or configuration errors
-                if (in_array($e->getExceptionCode(), ['AccessDenied', 'InvalidAccessKeyId', 'SignatureDoesNotMatch', 'NoSuchBucket'])) {
+                if ($this->isAuthenticationError($e) || $this->isBucketError($e)) {
                     throw $e;
                 }
 
@@ -527,4 +526,81 @@ abstract class AbstractHuaweiObsAdapter
 
         return 'private';
     }
+
+    /**
+     * Extract error code from ObsException with fallback to response headers
+     *
+     * @param ObsException $exception
+     * @return string|null
+     */
+    protected function extractErrorCode(ObsException $exception): ?string
+    {
+        $errorCode = $exception->getExceptionCode();
+        
+        // If getExceptionCode() returns null, try to extract from response headers
+        if ($errorCode === null) {
+            try {
+                $reflection = new \ReflectionClass($exception);
+                $responseProperty = $reflection->getProperty('response');
+                $responseProperty->setAccessible(true);
+                $response = $responseProperty->getValue($exception);
+                
+                if ($response !== null && method_exists($response, 'getHeader')) {
+                    $errorCodeHeader = $response->getHeader('x-obs-error-code');
+                    if (!empty($errorCodeHeader)) {
+                        $errorCode = $errorCodeHeader[0];
+                    }
+                }
+            } catch (\ReflectionException $reflectionException) {
+                // If reflection fails, return null
+            }
+        }
+        
+        return $errorCode;
+    }
+
+    /**
+     * Check if an ObsException represents a "not found" error
+     *
+     * @param ObsException $exception
+     * @return bool
+     */
+    protected function isNotFoundError(ObsException $exception): bool
+    {
+        $errorCode = $this->extractErrorCode($exception);
+        $errorMessage = $exception->getMessage();
+        
+        return $errorCode === 'NoSuchKey' || 
+               $errorCode === 'NoSuchResource' || 
+               str_contains($errorMessage, 'NoSuchKey') || 
+               str_contains($errorMessage, 'NoSuchResource');
+    }
+
+    /**
+     * Check if an ObsException represents an authentication error
+     *
+     * @param ObsException $exception
+     * @return bool
+     */
+    protected function isAuthenticationError(ObsException $exception): bool
+    {
+        $errorCode = $this->extractErrorCode($exception);
+        
+        return in_array($errorCode, ['AccessDenied', 'InvalidAccessKeyId', 'SignatureDoesNotMatch']);
+    }
+
+    /**
+     * Check if an ObsException represents a bucket error
+     *
+     * @param ObsException $exception
+     * @return bool
+     */
+    protected function isBucketError(ObsException $exception): bool
+    {
+        $errorCode = $this->extractErrorCode($exception);
+        
+        return $errorCode === 'NoSuchBucket';
+    }
+
+
 }
