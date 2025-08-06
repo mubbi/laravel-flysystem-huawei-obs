@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.10](https://github.com/mubbi/laravel-flysystem-huawei-obs/compare/v1.2.9...v1.2.10) (2025-08-06)
+
+
+### Bug Fixes
+
+* infinite loop bug in listingContents ([4943668](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/49436689d138b61f7a8923b62a4d58dce1b2288d))
+
 ## [1.2.9](https://github.com/mubbi/laravel-flysystem-huawei-obs/compare/v1.2.8...v1.2.9) (2025-08-04)
 
 
