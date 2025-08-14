@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.11](https://github.com/mubbi/laravel-flysystem-huawei-obs/compare/v1.2.10...v1.2.11) (2025-08-14)
+
+
+### Bug Fixes
+
+* exceptions handling ([2b7a56e](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/2b7a56ea3f1fb6d63d5001c0efbc5f38eca583ff))
+* various issues in OBS connection ([16da348](https://github.com/mubbi/laravel-flysystem-huawei-obs/commit/16da34827a09dae755f3607fa5174577cfc233b9))
+
 ## [1.2.10](https://github.com/mubbi/laravel-flysystem-huawei-obs/compare/v1.2.9...v1.2.10) (2025-08-06)
 
 
