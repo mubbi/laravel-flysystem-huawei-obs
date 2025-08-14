@@ -39,7 +39,19 @@ class LaravelHuaweiObsAdapter implements FilesystemAdapter
         int $retryDelay = 1,
         bool $loggingEnabled = false,
         bool $logOperations = false,
-        bool $logErrors = true
+        bool $logErrors = true,
+        bool $sslVerify = true,
+        ?string $signature = null,
+        ?bool $pathStyle = null,
+        ?string $region = null,
+        ?string $sslCertificateAuthority = null,
+        ?int $maxRetryCount = null,
+        ?int $timeout = null,
+        ?int $socketTimeout = null,
+        ?int $connectTimeout = null,
+        ?int $chunkSize = null,
+        ?string $exceptionResponseMode = null,
+        ?bool $isCname = null
     ) {
         $this->adapter = new HuaweiObsAdapter(
             $accessKeyId,
@@ -53,7 +65,19 @@ class LaravelHuaweiObsAdapter implements FilesystemAdapter
             $retryDelay,
             $loggingEnabled,
             $logOperations,
-            $logErrors
+            $logErrors,
+            $sslVerify,
+            $signature,
+            $pathStyle,
+            $region,
+            $sslCertificateAuthority,
+            $maxRetryCount,
+            $timeout,
+            $socketTimeout,
+            $connectTimeout,
+            $chunkSize,
+            $exceptionResponseMode,
+            $isCname
         );
     }
 
@@ -285,6 +309,50 @@ class LaravelHuaweiObsAdapter implements FilesystemAdapter
     public function temporaryUploadUrl(string $path, \DateTimeInterface $expiration, array $options = []): string
     {
         return $this->adapter->temporaryUploadUrl($path, $expiration, $options);
+    }
+
+    // Advanced Huawei OBS features passthroughs
+    /**
+     * @param  array<string, string>  $headers
+     */
+    public function createSignedUrl(string $path, string $method = 'GET', int $expires = 3600, array $headers = []): string
+    {
+        return $this->adapter->createSignedUrl($path, $method, $expires, $headers);
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $conditions
+     * @return array<string, mixed>
+     */
+    public function createPostSignature(string $path, array $conditions = [], int $expires = 3600): array
+    {
+        return $this->adapter->createPostSignature($path, $conditions, $expires);
+    }
+
+    /**
+     * @param  array<string, string>  $tags
+     */
+    public function setObjectTags(string $path, array $tags): void
+    {
+        $this->adapter->setObjectTags($path, $tags);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getObjectTags(string $path): array
+    {
+        return $this->adapter->getObjectTags($path);
+    }
+
+    public function deleteObjectTags(string $path): void
+    {
+        $this->adapter->deleteObjectTags($path);
+    }
+
+    public function restoreObject(string $path, int $days = 1): void
+    {
+        $this->adapter->restoreObject($path, $days);
     }
 
     /**

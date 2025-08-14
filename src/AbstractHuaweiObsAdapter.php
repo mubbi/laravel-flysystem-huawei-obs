@@ -33,6 +33,8 @@ abstract class AbstractHuaweiObsAdapter
 
     protected string $bucket;
 
+    protected string $endpoint;
+
     protected ?string $prefix;
 
     protected ?bool $authenticated = null;
@@ -61,9 +63,22 @@ abstract class AbstractHuaweiObsAdapter
         int $retryDelay = 1,
         bool $loggingEnabled = false,
         bool $logOperations = false,
-        bool $logErrors = true
+        bool $logErrors = true,
+        bool $sslVerify = true,
+        ?string $signature = null,
+        ?bool $pathStyle = null,
+        ?string $region = null,
+        ?string $sslCertificateAuthority = null,
+        ?int $maxRetryCount = null,
+        ?int $timeout = null,
+        ?int $socketTimeout = null,
+        ?int $connectTimeout = null,
+        ?int $chunkSize = null,
+        ?string $exceptionResponseMode = null,
+        ?bool $isCname = null
     ) {
         $this->bucket = $bucket;
+        $this->endpoint = $endpoint;
         $this->prefix = $prefix;
         $this->retryAttempts = $retryAttempts;
         $this->retryDelay = $retryDelay;
@@ -75,12 +90,56 @@ abstract class AbstractHuaweiObsAdapter
             'key' => $accessKeyId,
             'secret' => $secretAccessKey,
             'endpoint' => $endpoint,
-            'ssl_verify' => false,
+            'ssl_verify' => $sslVerify,
             'http_client' => $httpClient,
         ];
 
         if ($securityToken !== null) {
             $config['security_token'] = $securityToken;
+        }
+
+        if ($signature !== null) {
+            $config['signature'] = $signature;
+        }
+
+        if ($pathStyle !== null) {
+            $config['path_style'] = $pathStyle;
+        }
+
+        if ($region !== null) {
+            $config['region'] = $region;
+        }
+
+        if ($sslCertificateAuthority !== null) {
+            $config['ssl.certificate_authority'] = $sslCertificateAuthority;
+        }
+
+        if ($maxRetryCount !== null) {
+            $config['max_retry_count'] = $maxRetryCount;
+        }
+
+        if ($timeout !== null) {
+            $config['timeout'] = $timeout;
+        }
+
+        if ($socketTimeout !== null) {
+            $config['socket_timeout'] = $socketTimeout;
+        }
+
+        if ($connectTimeout !== null) {
+            $config['connect_timeout'] = $connectTimeout;
+        }
+
+        if ($chunkSize !== null) {
+            $config['chunk_size'] = $chunkSize;
+        }
+
+        if ($exceptionResponseMode !== null) {
+            $config['exception_response_mode'] = $exceptionResponseMode;
+        }
+
+        if ($isCname !== null) {
+            $config['is_cname'] = $isCname;
         }
 
         $this->client = new ObsClient($config);
@@ -321,7 +380,7 @@ abstract class AbstractHuaweiObsAdapter
             $duration = microtime(true) - $startTime;
             $this->logOperation('createPostSignature', $path, $duration, ['expires' => $expires]);
 
-            return $result;
+            return $this->normalizeObsResultArray($result);
         } catch (ObsException $e) {
             $this->logError('createPostSignature', $path, $e);
 
@@ -529,14 +588,11 @@ abstract class AbstractHuaweiObsAdapter
 
     /**
      * Extract error code from ObsException with fallback to response headers
-     *
-     * @param ObsException $exception
-     * @return string|null
      */
     protected function extractErrorCode(ObsException $exception): ?string
     {
         $errorCode = $exception->getExceptionCode();
-        
+
         // If getExceptionCode() returns null, try to extract from response headers
         if ($errorCode === null) {
             try {
@@ -544,63 +600,94 @@ abstract class AbstractHuaweiObsAdapter
                 $responseProperty = $reflection->getProperty('response');
                 $responseProperty->setAccessible(true);
                 $response = $responseProperty->getValue($exception);
-                
-                if ($response !== null && method_exists($response, 'getHeader')) {
-                    $errorCodeHeader = $response->getHeader('x-obs-error-code');
-                    if (!empty($errorCodeHeader)) {
-                        $errorCode = $errorCodeHeader[0];
+
+                if ($response instanceof \Psr\Http\Message\ResponseInterface) {
+                    $errorCodeLine = $response->getHeaderLine('x-obs-error-code');
+                    if ($errorCodeLine !== '') {
+                        $errorCode = $errorCodeLine;
                     }
                 }
             } catch (\ReflectionException $reflectionException) {
                 // If reflection fails, return null
             }
         }
-        
+
         return $errorCode;
     }
 
     /**
      * Check if an ObsException represents a "not found" error
-     *
-     * @param ObsException $exception
-     * @return bool
      */
     protected function isNotFoundError(ObsException $exception): bool
     {
         $errorCode = $this->extractErrorCode($exception);
         $errorMessage = $exception->getMessage();
-        
-        return $errorCode === 'NoSuchKey' || 
-               $errorCode === 'NoSuchResource' || 
-               str_contains($errorMessage, 'NoSuchKey') || 
+
+        return $errorCode === 'NoSuchKey' ||
+               $errorCode === 'NoSuchResource' ||
+               str_contains($errorMessage, 'NoSuchKey') ||
                str_contains($errorMessage, 'NoSuchResource');
     }
 
     /**
      * Check if an ObsException represents an authentication error
-     *
-     * @param ObsException $exception
-     * @return bool
      */
     protected function isAuthenticationError(ObsException $exception): bool
     {
         $errorCode = $this->extractErrorCode($exception);
-        
+
         return in_array($errorCode, ['AccessDenied', 'InvalidAccessKeyId', 'SignatureDoesNotMatch']);
     }
 
     /**
      * Check if an ObsException represents a bucket error
-     *
-     * @param ObsException $exception
-     * @return bool
      */
     protected function isBucketError(ObsException $exception): bool
     {
         $errorCode = $this->extractErrorCode($exception);
-        
+
         return $errorCode === 'NoSuchBucket';
     }
 
+    /**
+     * Normalize Huawei OBS SDK result into a plain array
+     *
+     * @param  mixed  $result
+     * @return array<string, mixed>
+     */
+    protected function normalizeObsResultArray($result): array
+    {
+        if (is_array($result)) {
+            return $result;
+        }
 
+        // Newer SDKs may return an object with array-like accessors
+        if (is_object($result)) {
+            // Try common access patterns
+            if ($result instanceof \ArrayAccess) {
+                // Extract known fields if present
+                $keys = ['Policy', 'Signature', 'AccessKeyId', 'x-obs-security-token', 'Key', 'Bucket', 'Expires', 'url', 'fields'];
+                $out = [];
+                foreach ($keys as $k) {
+                    $out[$k] = $result[$k] ?? null;
+                }
+
+                // Remove nulls
+                return array_filter($out, static fn ($v) => $v !== null);
+            }
+
+            // Fallback: convert public properties
+            /** @var array<string,mixed> $props */
+            $props = get_object_vars($result);
+            if (! empty($props)) {
+                return $props;
+            }
+        }
+
+        // Last resort: cast
+        /** @var array<string,mixed> $cast */
+        $cast = (array) $result;
+
+        return $cast;
+    }
 }

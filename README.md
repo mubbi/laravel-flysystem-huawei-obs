@@ -27,7 +27,7 @@ This package now supports multiple versions of both Flysystem and Guzzle:
 
 - ✅ **Complete Flysystem v3 Compatibility**: Full implementation of all required and optional Flysystem methods
 - ✅ **Laravel Integration**: Seamless integration with Laravel's Storage facade
-- ✅ **Huawei OBS SDK Integration**: Uses the official `obs/esdk-obs-php` SDK
+ - ✅ **Huawei OBS SDK Integration**: Uses `mubbi/esdk-obs-php` (Huawei OBS SDK compatible fork)
 - ✅ **Temporary Credentials**: Support for session tokens (`securityToken`)
 - ✅ **Signed URLs**: Generate pre-signed URLs for temporary object access
 - ✅ **Public URLs**: Generate public URLs for objects with public read access
@@ -93,19 +93,46 @@ composer require mubbi/laravel-flysystem-huawei-obs
 2. Publish the configuration (optional):
 
 ```bash
-php artisan vendor:publish --provider="LaravelFlysystemHuaweiObs\HuaweiObsServiceProvider"
+php artisan vendor:publish --provider="LaravelFlysystemHuaweiObs\HuaweiObsServiceProvider" --tag=huawei-obs-config
 ```
 
 3. Add your Huawei OBS credentials to your `.env` file:
 
 ```env
+# Required Configuration
 HUAWEI_OBS_ACCESS_KEY_ID=your_access_key_id
 HUAWEI_OBS_SECRET_ACCESS_KEY=your_secret_access_key
 HUAWEI_OBS_BUCKET=your_bucket_name
 HUAWEI_OBS_ENDPOINT=https://obs.cn-north-1.myhuaweicloud.com
-HUAWEI_OBS_REGION=cn-north-1
+
+# Optional Configuration
 HUAWEI_OBS_PREFIX=optional_prefix
 HUAWEI_OBS_SECURITY_TOKEN=your_security_token_for_temporary_credentials
+
+# Advanced OBSClient Configuration
+HUAWEI_OBS_SIGNATURE=v4
+HUAWEI_OBS_PATH_STYLE=false
+HUAWEI_OBS_REGION=cn-north-1
+HUAWEI_OBS_SSL_CERTIFICATE_AUTHORITY=
+HUAWEI_OBS_MAX_RETRY_COUNT=3
+HUAWEI_OBS_SOCKET_TIMEOUT=60
+HUAWEI_OBS_CHUNK_SIZE=8192
+HUAWEI_OBS_EXCEPTION_RESPONSE_MODE=exception
+HUAWEI_OBS_IS_CNAME=false
+
+# HTTP Client Configuration
+HUAWEI_OBS_TIMEOUT=120
+HUAWEI_OBS_CONNECT_TIMEOUT=30
+HUAWEI_OBS_VERIFY_SSL=true
+
+# Retry Configuration
+HUAWEI_OBS_RETRY_ATTEMPTS=3
+HUAWEI_OBS_RETRY_DELAY=1
+
+# Logging Configuration
+HUAWEI_OBS_LOGGING_ENABLED=false
+HUAWEI_OBS_LOG_OPERATIONS=false
+HUAWEI_OBS_LOG_ERRORS=true
 ```
 
 4. Configure your filesystem in `config/filesystems.php`:
@@ -114,27 +141,52 @@ HUAWEI_OBS_SECURITY_TOKEN=your_security_token_for_temporary_credentials
 'disks' => [
     'huawei-obs' => [
         'driver' => 'huawei-obs',
+        
+        // Required Configuration
         'key' => env('HUAWEI_OBS_ACCESS_KEY_ID'),
         'secret' => env('HUAWEI_OBS_SECRET_ACCESS_KEY'),
         'bucket' => env('HUAWEI_OBS_BUCKET'),
         'endpoint' => env('HUAWEI_OBS_ENDPOINT'),
-        'region' => env('HUAWEI_OBS_REGION'),
+        
+        // Optional Configuration
         'prefix' => env('HUAWEI_OBS_PREFIX'),
         'security_token' => env('HUAWEI_OBS_SECURITY_TOKEN'),
-        'visibility' => 'private',
-        'throw' => false,
+        
+        // Advanced OBSClient Configuration
+        'signature' => env('HUAWEI_OBS_SIGNATURE', 'v4'),
+        'path_style' => env('HUAWEI_OBS_PATH_STYLE', false),
+        'region' => env('HUAWEI_OBS_REGION'),
+        'ssl_verify' => env('HUAWEI_OBS_VERIFY_SSL', true),
+        'ssl.certificate_authority' => env('HUAWEI_OBS_SSL_CERTIFICATE_AUTHORITY'),
+        'max_retry_count' => env('HUAWEI_OBS_MAX_RETRY_COUNT', 3),
+        'timeout' => env('HUAWEI_OBS_TIMEOUT', 120),
+        'socket_timeout' => env('HUAWEI_OBS_SOCKET_TIMEOUT', 60),
+        'connect_timeout' => env('HUAWEI_OBS_CONNECT_TIMEOUT', 30),
+        'chunk_size' => env('HUAWEI_OBS_CHUNK_SIZE', 8192),
+        'exception_response_mode' => env('HUAWEI_OBS_EXCEPTION_RESPONSE_MODE', 'exception'),
+        'is_cname' => env('HUAWEI_OBS_IS_CNAME', false),
+        
+        // HTTP Client Configuration
         'http_client' => [
-            'timeout' => 30,
-            'connect_timeout' => 10,
-            'verify' => true,
+            'timeout' => env('HUAWEI_OBS_TIMEOUT', 120),
+            'connect_timeout' => env('HUAWEI_OBS_CONNECT_TIMEOUT', 30),
+            'verify' => env('HUAWEI_OBS_VERIFY_SSL', true),
             'proxy' => null,
             'headers' => [],
         ],
-        'retry_attempts' => 3,
-        'retry_delay' => 1,
-        'logging_enabled' => false,
-        'log_operations' => false,
-        'log_errors' => true,
+        
+        // Retry Configuration
+        'retry_attempts' => env('HUAWEI_OBS_RETRY_ATTEMPTS', 3),
+        'retry_delay' => env('HUAWEI_OBS_RETRY_DELAY', 1),
+        
+        // Logging Configuration
+        'logging_enabled' => env('HUAWEI_OBS_LOGGING_ENABLED', false),
+        'log_operations' => env('HUAWEI_OBS_LOG_OPERATIONS', false),
+        'log_errors' => env('HUAWEI_OBS_LOG_ERRORS', true),
+        
+        // Flysystem Configuration
+        'visibility' => 'private',
+        'throw' => false,
     ],
 ],
 ```
@@ -169,22 +221,88 @@ $tempUrl = Storage::disk('huawei-obs')->temporaryUrl('file.txt', now()->addHour(
 
 ### Direct Adapter Usage
 
-You can also use the adapter directly:
+You can also use the adapter directly (Flysystem v3 interface):
 
 ```php
-use LaravelFlysystemHuaweiObs\HuaweiObsAdapter;
+use LaravelFlysystemHuaweiObs\LaravelHuaweiObsAdapter;
+use League\Flysystem\Filesystem;
+use League\Flysystem\Config;
 
-$adapter = new HuaweiObsAdapter(
-    'your_access_key_id',
-    'your_secret_access_key',
-    'your_bucket_name',
-    'https://obs.cn-north-1.myhuaweicloud.com'
+$adapter = new LaravelHuaweiObsAdapter(
+    env('HUAWEI_OBS_ACCESS_KEY_ID'),
+    env('HUAWEI_OBS_SECRET_ACCESS_KEY'),
+    env('HUAWEI_OBS_BUCKET'),
+    env('HUAWEI_OBS_ENDPOINT'),
+    env('HUAWEI_OBS_PREFIX'),
 );
 
-// Use Flysystem methods directly
-$adapter->write('file.txt', 'Hello World', new \League\Flysystem\Config());
-$contents = $adapter->read('file.txt');
+$filesystem = new Filesystem($adapter);
+
+$filesystem->write('file.txt', 'Hello World', new Config());
+$contents = $filesystem->read('file.txt');
 ```
+
+## Configuration Options
+
+### Required Configuration
+
+These options are required for the adapter to function:
+
+- `key` - Your Huawei OBS Access Key ID
+- `secret` - Your Huawei OBS Secret Access Key  
+- `bucket` - The OBS bucket name
+- `endpoint` - The OBS endpoint URL (e.g., `https://obs.cn-north-1.myhuaweicloud.com`)
+
+### Optional Configuration
+
+- `prefix` - Optional path prefix for all operations
+- `security_token` - Security token for temporary credentials
+
+### Advanced OBSClient Configuration
+
+The adapter supports all OBSClient configuration options:
+
+- `signature` - Signature version (`v2`, `v4`, `obs`) - Default: `v4`
+- `path_style` - Use path-style URLs instead of virtual-hosted-style - Default: `false`
+- `region` - OBS region (e.g., `cn-north-1`) - Optional
+- `ssl_verify` - Enable/disable SSL certificate verification - Default: `true`
+- `ssl.certificate_authority` - Path to custom CA certificate bundle - Optional
+- `max_retry_count` - Maximum number of retry attempts - Default: `3`
+- `timeout` - Request timeout in seconds - Default: `120`
+- `socket_timeout` - Socket timeout in seconds - Default: `60`
+- `connect_timeout` - Connection timeout in seconds - Default: `30`
+- `chunk_size` - Chunk size for multipart uploads in bytes - Default: `8192`
+- `exception_response_mode` - Exception response mode (`exception`, `response`) - Default: `exception`
+- `is_cname` - Whether the endpoint is a CNAME - Default: `false`
+
+### HTTP Client Configuration
+
+- `http_client.timeout` - Request timeout in seconds - Default: `120`
+- `http_client.connect_timeout` - Connection timeout in seconds - Default: `30`
+- `http_client.verify` - SSL certificate verification - Default: `true`
+- `http_client.proxy` - HTTP proxy configuration - Optional
+- `http_client.headers` - Additional HTTP headers - Optional
+
+### Retry Configuration
+
+- `retry_attempts` - Number of retry attempts for transient errors - Default: `3`
+- `retry_delay` - Base delay between retries in seconds - Default: `1`
+
+### Logging Configuration
+
+- `logging_enabled` - Enable/disable logging - Default: `false`
+- `log_operations` - Log successful operations - Default: `false`
+- `log_errors` - Log errors - Default: `true`
+
+### Examples
+
+See the `examples/` directory for concise, copy-pasteable snippets:
+
+- `examples/usage.php`: basic write/read with Flysystem
+- `examples/url-usage.php`: URL and temporary URL usage
+- `examples/advanced-usage.php`: signed URLs, post signatures, tags, restore, optimized listing
+- `examples/controller-compatibility.php`: controller-style listing example
+- `examples/laravel-compatibility-demo.php`: Storage facade compatibility helpers
 
 ## Advanced Features
 
@@ -387,7 +505,7 @@ $adapter->refreshCredentials('new_access_key', 'new_secret_key', 'new_security_t
 
 ### URL Handling
 
-The adapter supports both public URLs and signed URLs, with full Laravel compatibility:
+The adapter supports both public URLs and signed URLs. For Laravel's `Storage` facade:
 
 #### Public and Private URLs
 
@@ -477,17 +595,16 @@ Storage::disk('huawei-obs')->restoreObject('archived-file.txt', 7);
 
 ### Artisan Command
 
-The package includes an Artisan command for testing connectivity:
+The package includes an Artisan command for testing connectivity and features:
 
 ```bash
 php artisan huawei-obs:test
 ```
 
 This command will:
-- Test authentication with your configured credentials
-- Verify bucket access
-- Test basic file operations
-- Display detailed results
+- Validate credentials and bucket access
+- Test reads/writes, signed URLs, post signatures, and tagging
+- Output a concise pass/fail report
 
 ### Manual Testing
 
@@ -538,7 +655,7 @@ try {
 
 ### Custom Exceptions
 
-The package provides specific exceptions for different error types:
+The package provides specific exceptions for different error types used by advanced features:
 
 ```php
 use LaravelFlysystemHuaweiObs\Exceptions\UnableToCreateSignedUrl;
@@ -641,7 +758,8 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 1. Clone the repository
 2. Install dependencies: `composer install`
 3. Run tests: `composer test`
-4. Run code quality checks: `composer check`
+4. Static analysis: `composer phpstan`
+5. Lint/format: `composer pint`
 
 ### Code Quality
 

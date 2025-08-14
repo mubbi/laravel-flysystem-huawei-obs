@@ -2,131 +2,51 @@
 
 declare(strict_types=1);
 
-/**
- * Example usage of Laravel Flysystem Huawei OBS Adapter
- *
- * This file demonstrates various ways to use the Huawei OBS adapter
- * in a Laravel application.
- *
- * @author  Mubbasher Ahmed <hello@mubbi.me>
- *
- * @link    https://mubbi.me
- *
- * @license MIT
- */
+// Basic usage examples for Laravel Flysystem Huawei OBS Adapter
 
-use Illuminate\Support\Facades\Storage;
-use League\Flysystem\Visibility;
+// 1) In a Laravel application (using the Storage facade):
+//
+// In config/filesystems.php, add a disk named 'huawei-obs' as shown in README.
+// Then you can use:
+//
+// use Illuminate\Support\Facades\Storage;
+//
+// Storage::disk('huawei-obs')->put('file.txt', 'Hello World');
+// $contents = Storage::disk('huawei-obs')->get('file.txt');
+// $exists = Storage::disk('huawei-obs')->exists('file.txt');
+// Storage::disk('huawei-obs')->delete('file.txt');
 
-// Basic file operations
-echo "=== Basic File Operations ===\n";
+// 2) Direct Flysystem usage without Laravel (standalone PHP):
+//
+// composer require mubbi/laravel-flysystem-huawei-obs
+//
+// Then:
 
-// Store a file
-Storage::disk('huawei-obs')->put('example.txt', 'Hello from Huawei OBS!');
-echo "File stored successfully\n";
+use LaravelFlysystemHuaweiObs\LaravelHuaweiObsAdapter;
+use League\Flysystem\Config;
+use League\Flysystem\Filesystem;
 
-// Check if file exists
-if (Storage::disk('huawei-obs')->exists('example.txt')) {
-    echo "File exists\n";
-}
+// Replace with your environment values
+$accessKeyId = getenv('HUAWEI_OBS_ACCESS_KEY_ID') ?: 'your-access-key';
+$secretKey = getenv('HUAWEI_OBS_SECRET_ACCESS_KEY') ?: 'your-secret-key';
+$bucket = getenv('HUAWEI_OBS_BUCKET') ?: 'your-bucket';
+$endpoint = getenv('HUAWEI_OBS_ENDPOINT') ?: 'https://obs.cn-north-1.myhuaweicloud.com';
+$prefix = getenv('HUAWEI_OBS_PREFIX') ?: null;
+$token = getenv('HUAWEI_OBS_SECURITY_TOKEN') ?: null; // optional temporary credentials
 
-// Get file contents
-$contents = Storage::disk('huawei-obs')->get('example.txt');
-echo "File contents: {$contents}\n";
-
-// Get file size
-$size = Storage::disk('huawei-obs')->size('example.txt');
-echo "File size: {$size} bytes\n";
-
-// Get last modified time
-$modified = Storage::disk('huawei-obs')->lastModified('example.txt');
-echo 'Last modified: '.date('Y-m-d H:i:s', $modified)."\n";
-
-// Get mime type
-$mimeType = Storage::disk('huawei-obs')->mimeType('example.txt');
-echo "MIME type: {$mimeType}\n";
-
-// File uploads
-echo "\n=== File Uploads ===\n";
-
-// Upload with custom filename
-Storage::disk('huawei-obs')->putFileAs(
-    'uploads',
-    'example.txt',
-    'custom-name.txt',
-    ['visibility' => Visibility::PUBLIC]
+$adapter = new LaravelHuaweiObsAdapter(
+    $accessKeyId,
+    $secretKey,
+    $bucket,
+    $endpoint,
+    $prefix,
+    httpClient: null,
+    securityToken: $token,
 );
-echo "File uploaded with custom name\n";
 
-// Directory operations
-echo "\n=== Directory Operations ===\n";
+$filesystem = new Filesystem($adapter);
 
-// Create a directory
-Storage::disk('huawei-obs')->makeDirectory('documents');
-echo "Directory created\n";
-
-// List files in directory
-$files = Storage::disk('huawei-obs')->files('uploads');
-echo 'Files in uploads directory: '.implode(', ', $files)."\n";
-
-// List directories
-$directories = Storage::disk('huawei-obs')->directories('');
-echo 'Directories: '.implode(', ', $directories)."\n";
-
-// File operations
-echo "\n=== File Operations ===\n";
-
-// Copy a file
-Storage::disk('huawei-obs')->copy('example.txt', 'example-copy.txt');
-echo "File copied\n";
-
-// Move a file
-Storage::disk('huawei-obs')->move('example-copy.txt', 'documents/example-moved.txt');
-echo "File moved\n";
-
-// File visibility
-echo "\n=== File Visibility ===\n";
-
-// Set file to public
-Storage::disk('huawei-obs')->setVisibility('example.txt', Visibility::PUBLIC);
-echo "File visibility set to public\n";
-
-// Get file visibility
-$visibility = Storage::disk('huawei-obs')->getVisibility('example.txt');
-echo "File visibility: {$visibility}\n";
-
-// Stream operations
-echo "\n=== Stream Operations ===\n";
-
-// Write from stream
-$stream = fopen('php://temp', 'r+');
-fwrite($stream, 'Stream content');
-rewind($stream);
-
-Storage::disk('huawei-obs')->writeStream('stream.txt', $stream);
-echo "Stream written\n";
-
-// Read to stream
-$readStream = Storage::disk('huawei-obs')->readStream('stream.txt');
-$streamContent = stream_get_contents($readStream);
-fclose($readStream);
-echo "Stream content: {$streamContent}\n";
-
-// Cleanup
-echo "\n=== Cleanup ===\n";
-
-// Delete files
-Storage::disk('huawei-obs')->delete([
-    'example.txt',
-    'stream.txt',
-    'uploads/custom-name.txt',
-    'documents/example-moved.txt',
-]);
-echo "Files deleted\n";
-
-// Delete directories
-Storage::disk('huawei-obs')->deleteDirectory('uploads');
-Storage::disk('huawei-obs')->deleteDirectory('documents');
-echo "Directories deleted\n";
-
-echo "\nExample completed successfully!\n";
+// Write and read
+$filesystem->write('demo/example.txt', 'Hello World', new Config);
+$contents = $filesystem->read('demo/example.txt');
+echo "Read back: {$contents}\n";

@@ -91,6 +91,12 @@ class HttpClientFactory
      */
     public static function detectGuzzleVersion(): string
     {
+        // Test override via environment variable (used only in tests)
+        $override = getenv('HUAWEI_OBS_HTTP_CLIENT_FACTORY_GUZZLE_VERSION');
+        if (is_string($override) && in_array($override, ['v6', 'v7', 'v8'], true)) {
+            return $override;
+        }
+
         // Check if GuzzleHttp\Client exists
         if (! class_exists('GuzzleHttp\Client')) {
             return 'v7'; // Default fallback
@@ -133,15 +139,15 @@ class HttpClientFactory
             }
 
             // Check for v8-specific methods or properties
-            if ($reflection->hasMethod('sendRequest') &&
-                method_exists(Client::class, 'sendRequest')) {
+            if ($reflection->hasMethod('sendRequest') && method_exists(Client::class, 'sendRequest')) {
                 // Additional check for v8-specific behavior
                 $sendRequestMethod = $reflection->getMethod('sendRequest');
                 $parameters = $sendRequestMethod->getParameters();
-                if (count($parameters) === 1 &&
-                    $parameters[0]->getType() &&
-                    $parameters[0]->getType()->getName() === 'Psr\Http\Message\RequestInterface') {
-                    return 'v8';
+                if (count($parameters) === 1) {
+                    $type = $parameters[0]->getType();
+                    if ($type instanceof \ReflectionNamedType && $type->getName() === 'Psr\\Http\\Message\\RequestInterface') {
+                        return 'v8';
+                    }
                 }
             }
 

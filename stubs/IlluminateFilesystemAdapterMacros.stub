@@ -1,0 +1,87 @@
+<?php
+
+namespace Illuminate\Filesystem {
+    class FilesystemAdapter
+    {
+        /**
+         * Indicates whether a macro is registered.
+         * @param string $name
+         */
+        public static function hasMacro(string $name): bool {}
+
+        /**
+         * @param string $path
+         * @param string $method
+         * @param int $expires
+         * @param array<string,string> $headers
+         * @return string
+         */
+        public function createSignedUrl(string $path, string $method = 'GET', int $expires = 3600, array $headers = []): string {}
+
+        /**
+         * @param string $path
+         * @param array<int, array<string,mixed>> $conditions
+         * @param int $expires
+         * @return array<string,mixed>
+         */
+        public function createPostSignature(string $path, array $conditions = [], int $expires = 3600): array {}
+
+        /**
+         * @param string $path
+         * @param array<string,string> $tags
+         * @return void
+         */
+        public function setObjectTags(string $path, array $tags): void {}
+
+        /**
+         * @param string $path
+         * @return array<string,string>
+         */
+        public function getObjectTags(string $path): array {}
+
+        /**
+         * @param string $path
+         * @return void
+         */
+        public function deleteObjectTags(string $path): void {}
+
+        /**
+         * @param string $path
+         * @param int $days
+         * @return void
+         */
+        public function restoreObject(string $path, int $days = 1): void {}
+
+        /**
+         * @param int $maxFiles
+         * @param int $timeout
+         * @return array<string,mixed>
+         */
+        public function getStorageStats(int $maxFiles = 0, int $timeout = 60): array {}
+
+        /**
+         * @param int $maxKeys
+         * @param int $timeout
+         * @return array<int, string>
+         */
+        public function allFilesOptimized(int $maxKeys = 0, int $timeout = 60): array {}
+
+        /**
+         * @param int $maxKeys
+         * @param int $timeout
+         * @return array<int, string>
+         */
+        public function allDirectoriesOptimized(int $maxKeys = 0, int $timeout = 60): array {}
+
+        /**
+         * @param string $path
+         * @param bool $deep
+         * @param int $maxKeys
+         * @param int $timeout
+         * @return iterable<mixed>
+         */
+        public function listContentsOptimized(string $path = '', bool $deep = false, int $maxKeys = 0, int $timeout = 60): iterable {}
+    }
+}
+
+

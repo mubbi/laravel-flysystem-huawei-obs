@@ -211,6 +211,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
     public function delete(string $path): void
     {
         try {
+            $this->checkAuthentication();
             $key = $this->getKey($path);
             $this->client->deleteObject([
                 'Bucket' => $this->bucket,
@@ -224,6 +225,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
     public function deleteDirectory(string $path): void
     {
         try {
+            $this->checkAuthentication();
             $key = $this->getKey($path);
             $key = rtrim($key, '/').'/';
 
@@ -295,6 +297,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
     public function createDirectory(string $path, Config $config): void
     {
         try {
+            $this->checkAuthentication();
             $key = $this->getKey($path);
             $key = rtrim($key, '/').'/';
 
@@ -311,6 +314,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
     public function setVisibility(string $path, string $visibility): void
     {
         try {
+            $this->checkAuthentication();
             $key = $this->getKey($path);
             $this->client->setObjectAcl([
                 'Bucket' => $this->bucket,
@@ -325,6 +329,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
     public function visibility(string $path): FileAttributes
     {
         try {
+            $this->checkAuthentication();
             $key = $this->getKey($path);
             $result = $this->client->getObjectAcl([
                 'Bucket' => $this->bucket,
@@ -347,6 +352,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
     public function mimeType(string $path): FileAttributes
     {
         try {
+            $this->checkAuthentication();
             $key = $this->getKey($path);
             $result = $this->client->getObjectMetadata([
                 'Bucket' => $this->bucket,
@@ -369,6 +375,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
     public function lastModified(string $path): FileAttributes
     {
         try {
+            $this->checkAuthentication();
             $key = $this->getKey($path);
             $result = $this->client->getObjectMetadata([
                 'Bucket' => $this->bucket,
@@ -391,6 +398,7 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
     public function fileSize(string $path): FileAttributes
     {
         try {
+            $this->checkAuthentication();
             $key = $this->getKey($path);
             $result = $this->client->getObjectMetadata([
                 'Bucket' => $this->bucket,
@@ -596,8 +604,12 @@ class HuaweiObsAdapter extends AbstractHuaweiObsAdapter implements FilesystemAda
             }
 
             if ($isPublic) {
-                // Construct the public URL
-                $endpoint = rtrim($this->client->getConfig()['endpoint'], '/');
+                // Construct the public URL using the configured endpoint
+                $endpoint = property_exists($this, 'endpoint') ? (string) $this->endpoint : '';
+                if ($endpoint === '') {
+                    throw new \RuntimeException('Endpoint not configured for public URL generation');
+                }
+                $endpoint = rtrim($endpoint, '/');
 
                 return $endpoint.'/'.$this->bucket.'/'.$key;
             } else {

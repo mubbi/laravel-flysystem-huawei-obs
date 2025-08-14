@@ -10,11 +10,17 @@ parameters:
         - tests
     excludePaths:
         - tests/Fixtures
+        - tests/Integration
     checkMissingIterableValueType: true
     checkGenericClassInNonGenericObjectType: true
+    treatPhpDocTypesAsCertain: false
     ignoreErrors:
-        - '#Call to an undefined method [a-zA-Z0-9\\_]+::[a-zA-Z0-9\\_]+\(\)#'
-        - '#Mockery#'
+        # keep clean; prefer fixing with proper extensions/stubs instead of blanket ignores
     tmpDir: .phpstan
     parallel:
         maximumNumberOfProcesses: 4 
+    stubFiles:
+        - stubs/IlluminateFilesystemAdapterMacros.stub
+includes:
+    - vendor/phpstan/phpstan-mockery/extension.neon
+    - vendor/phpstan/phpstan-phpunit/extension.neon

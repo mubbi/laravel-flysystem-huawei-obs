@@ -106,9 +106,14 @@ class TestHuaweiObsCommand extends Command
      */
     private function getAdapter($disk): ?HuaweiObsAdapter
     {
-        // Access the underlying adapter
-        $filesystem = $disk->getDriver();
-        $adapter = $filesystem->getAdapter();
+        // Access the underlying adapter (Illuminate FilesystemAdapter)
+        if ($disk instanceof \Illuminate\Filesystem\FilesystemAdapter) {
+            $adapter = $disk->getAdapter();
+        } else {
+            // Try via getDriver() for older Laravel versions
+            $filesystem = method_exists($disk, 'getDriver') ? $disk->getDriver() : null;
+            $adapter = is_object($filesystem) && method_exists($filesystem, 'getAdapter') ? $filesystem->getAdapter() : null;
+        }
 
         if ($adapter instanceof HuaweiObsAdapter) {
             return $adapter;
