@@ -2,7 +2,7 @@
   "name": "mubbi/laravel-flysystem-huawei-obs",
   "description": "Laravel Flysystem v3 adapter for Huawei Object Storage Service (OBS) with v2 compatibility",
   "type": "library",
-  "version": "1.2.10",
+  "version": "1.2.11",
   "license": "MIT",
   "keywords": [
     "laravel",
